@@ -1,8 +1,8 @@
-import heroTowerImg from './default_hero_tower_1786667006054.jpg';
-import terrainVillaImg from './terrain_cantilever_villa_1786641237169.jpg';
-import lumenCenterImg from './lumen_cultural_center_1786641251205.jpg';
-import boleTowerImg from './bole_horizon_tower_1786641262408.jpg';
-import hawassaRetreatImg from './hawassa_lake_retreat_1786641272805.jpg';
+import heroTowerImg from './https://drive.google.com/file/d/1w0TBGnf42GLmcMsK3e6I9CnRM4-Tdhrv/view?usp=drive_link';
+import terrainVillaImg from './https://drive.google.com/file/d/1dfrPI_W9-sPGg_Rfga2zAePVpN5db6_O/view?usp=drive_link';
+import lumenCenterImg from './https://drive.google.com/file/d/1TJxzDihtkze0truaNCS5cQMSqqTLCvMd/view?usp=drive_link';
+import boleTowerImg from './https://drive.google.com/file/d/1lIQ6h3TdRh_bLMy37s8ivgynmnQVqfqJ/view?usp=drive_link';
+import hawassaRetreatImg from './https://drive.google.com/file/d/1ZZmY0Re5ZcSewXmfY8td7FXzKdZjrZjm/view?usp=drive_link';
 
 // Default Brand Assets for NILO AXIS STUDIO
 
