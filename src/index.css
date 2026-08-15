@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+@keyframes spinSlow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes ambientLight {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translate(120px, 60px) scale(1.15);
+    opacity: 0.85;
+  }
+}
+
+@keyframes drawLines {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.animate-spin-slow {
+  animation: spinSlow 25s linear infinite;
+}
+
+.animate-ambient-light {
+  animation: ambientLight 18s ease-in-out infinite;
+}
+
+.animate-draw-lines {
+  animation: drawLines 2s ease-out forwards;
+}
+
+/* Custom scrollbar styling for dark architectural theme */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #020617;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #38bdf8;
+}

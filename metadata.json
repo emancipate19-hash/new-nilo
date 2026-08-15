@@ -1,0 +1,8 @@
+{
+  "name": "Remix Nilo Axis Studio",
+  "description": "Contemporary architectural and design studio portfolio for NILO AXIS STUDIO featuring interactive works showcase, custom image management, and luxurious motion design.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
