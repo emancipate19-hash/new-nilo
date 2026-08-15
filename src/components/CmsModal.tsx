@@ -4,7 +4,7 @@ import {
   X, Save, RotateCcw, Download, Upload, Plus, Trash2, Eye, EyeOff,
   MoveUp, MoveDown, Layers, Image as ImageIcon, FileText, Settings,
   Users, Award, HelpCircle, MessageSquare, Layout, Palette, Globe,
-  ShieldAlert, Sliders, Check, ArrowRight, Video, Sparkles, Compass
+  ShieldAlert, Sliders, Check, ArrowRight, Video, Sparkles, Compass, FolderSync
 } from 'lucide-react';
 import { Project, TeamMember, ServiceItem, PhilosophyBlock, BeforeAfterPair, Panorama360Item, ProcessStep, FaqItem, AwardItem, ClientItem, TestimonialItem, CustomSection } from '../types';
 
@@ -88,7 +88,8 @@ export const CmsModal: React.FC = () => {
     exportBackupJSON,
     importBackupJSON,
     resetToDefaults,
-    uploadFileAsDataUrl
+    uploadFileAsDataUrl,
+    setIsGoogleDriveModalOpen
   } = useStudio();
 
   const [activeTab, setActiveTab] = useState<string>('sections');
@@ -148,6 +149,15 @@ export const CmsModal: React.FC = () => {
           </div>
 
           <div className="flex items-center space-x-3">
+            <button
+              onClick={() => setIsGoogleDriveModalOpen(true)}
+              className="flex items-center space-x-1 text-xs px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500 hover:text-stone-950 text-amber-300 font-bold border border-amber-500/50 rounded transition shadow-sm"
+              title="Sync and replace portfolio photos with Google Drive folder"
+            >
+              <FolderSync className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">DRIVE SYNC</span>
+            </button>
+
             <button
               onClick={handleExport}
               className="flex items-center space-x-1 text-xs px-3 py-1.5 bg-stone-800 hover:bg-stone-700 text-stone-200 border border-stone-700 rounded transition"
@@ -1660,11 +1670,33 @@ const ThemeTab: React.FC<{
   return (
     <div className="space-y-6 max-w-4xl">
       <div>
-        <h3 className="text-lg font-bold text-amber-400 uppercase">11. THEME PRESETS & NEON STYLE</h3>
-        <p className="text-xs text-stone-400">Switch color palettes, accent highlights, fonts, and cursor effects.</p>
+        <h3 className="text-lg font-bold text-amber-400 uppercase">11. THEME PRESETS & SCROLL ANIMATIONS</h3>
+        <p className="text-xs text-stone-400">Switch color palettes, accent highlights, fonts, cursor effects, and GSAP / Framer Motion project list scroll animations.</p>
       </div>
 
       <div className="p-4 bg-stone-900 border border-stone-800 rounded-xl space-y-4">
+        <div>
+          <label className="text-[10px] text-amber-400 uppercase font-bold tracking-wider">Editorial Project List Scroll Animation</label>
+          <select
+            value={themeSettings.projectAnimationPreset || 'framer-slide-fade'}
+            onChange={(e) => {
+              updateThemeSettings({ ...themeSettings, projectAnimationPreset: e.target.value });
+              showToast(`Scroll animation set to ${e.target.value}`);
+            }}
+            className="w-full bg-stone-950 border border-amber-500/50 rounded px-3 py-2 text-xs text-amber-200 mt-1 font-mono"
+          >
+            <option value="framer-slide-fade">⚡ Framer Motion: Slide & Fade (Graceful Elevation)</option>
+            <option value="framer-spring-glide">🌊 Framer Motion: Spring Elastic Glide</option>
+            <option value="motion-fade-scale">✨ Framer Motion: Radiant Fade & Scale</option>
+            <option value="gsap-stagger-slide">🎬 GSAP: Inertial Slide-In (Power3 Easing)</option>
+            <option value="gsap-curtain-reveal">🏛️ GSAP: Architectural Curtain Reveal</option>
+            <option value="architectural-drift">📐 GSAP: Spatial Drift & Slow Elevation</option>
+          </select>
+          <p className="text-[10px] text-stone-500 mt-1 font-mono">
+            Applies hardware-accelerated scroll-triggered entrance physics to every project row in the Editorial Index.
+          </p>
+        </div>
+
         <div>
           <label className="text-[10px] text-stone-400 uppercase">Color Preset</label>
           <select

@@ -45,8 +45,10 @@ export const StaffSection: React.FC<StaffSectionProps> = ({ setCursorContext }) 
 
   // Modal / Editing State
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
+  const [viewingProfileMember, setViewingProfileMember] = useState<TeamMember | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const [expandedBioIds, setExpandedBioIds] = useState<Record<string, boolean>>({});
 
   // Form State for Adding / Editing
   const [formState, setFormState] = useState<Partial<TeamMember>>({
@@ -234,182 +236,207 @@ export const StaffSection: React.FC<StaffSectionProps> = ({ setCursorContext }) 
       </div>
 
       {/* Staff Members Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {visibleMembers.map((member, index) => (
-          <div
-            key={member.id}
-            id={`team-member-card-${member.id}`}
-            className={`group relative bg-stone-900/60 border rounded-sm overflow-hidden flex flex-col transition-all duration-300 ${
-              member.isVisible === false 
-                ? 'opacity-60 border-dashed border-stone-700 bg-stone-950/40' 
-                : 'border-stone-800/80 hover:border-amber-400/50 hover:shadow-[0_8px_30px_rgba(0,0,0,0.6)]'
-            }`}
-          >
-            {/* Portrait Image Container */}
-            <div className="relative aspect-[3/4] w-full overflow-hidden bg-stone-950">
-              <img
-                src={member.portrait}
-                alt={member.name}
-                referrerPolicy="no-referrer"
-                className="h-full w-full object-cover grayscale contrast-110 group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700"
-              />
-              
-              {/* Subtle Gradient Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-950/20 to-transparent opacity-80 group-hover:opacity-60 transition-opacity" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {visibleMembers.map((member, index) => {
+          const isExpanded = !!expandedBioIds[member.id];
+          return (
+            <div
+              key={member.id}
+              id={`team-member-card-${member.id}`}
+              className={`group relative bg-stone-900/70 border rounded-sm overflow-hidden flex flex-col transition-all duration-500 ${
+                member.isVisible === false 
+                  ? 'opacity-60 border-dashed border-stone-700 bg-stone-950/40' 
+                  : 'border-stone-800/80 hover:border-amber-400/50 hover:shadow-[0_12px_40px_rgba(0,0,0,0.8)]'
+              }`}
+            >
+              {/* Portrait Image Container */}
+              <div 
+                className="relative aspect-[3/4] w-full overflow-hidden bg-stone-950 cursor-pointer"
+                onClick={() => setViewingProfileMember(member)}
+              >
+                <img
+                  src={member.portrait}
+                  alt={member.name}
+                  referrerPolicy="no-referrer"
+                  className="h-full w-full object-cover grayscale contrast-110 group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700"
+                />
+                
+                {/* Subtle Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-950/20 to-transparent opacity-80 group-hover:opacity-60 transition-opacity" />
 
-              {/* Status Badge */}
-              <div className="absolute top-3 left-3 flex items-center gap-1.5 z-10">
-                <span className="px-2 py-0.5 bg-stone-950/90 backdrop-blur-md border border-stone-800 text-[10px] font-mono text-amber-300 font-bold uppercase rounded-xs">
-                  {`0${index + 1}`}
-                </span>
-                {member.isVisible === false && (
-                  <span className="px-2 py-0.5 bg-red-950/90 border border-red-800 text-[9px] font-mono text-red-300 uppercase">
-                    HIDDEN
+                {/* Status Badge */}
+                <div className="absolute top-3 left-3 flex items-center gap-1.5 z-10">
+                  <span className="px-2 py-0.5 bg-stone-950/90 backdrop-blur-md border border-stone-800 text-[10px] font-mono text-amber-300 font-bold uppercase rounded-xs">
+                    {`0${index + 1}`}
                   </span>
+                  {member.isVisible === false && (
+                    <span className="px-2 py-0.5 bg-red-950/90 border border-red-800 text-[9px] font-mono text-red-300 uppercase">
+                      HIDDEN
+                    </span>
+                  )}
+                </div>
+
+                {/* Direct Portrait Upload Button (Hover on portrait) */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setInlineUploadTargetId(member.id);
+                    inlineFileInputRef.current?.click();
+                  }}
+                  className="absolute top-3 right-3 p-1.5 bg-stone-950/80 hover:bg-amber-500 hover:text-stone-950 text-stone-300 backdrop-blur-md rounded border border-stone-700 opacity-0 group-hover:opacity-100 transition-all z-20"
+                  title="Upload new portrait image directly"
+                >
+                  <Upload className="h-3.5 w-3.5" />
+                </button>
+
+                {/* Admin Quick Action Floating Bar (Only when Inline Edit is Active from Top Navbar) */}
+                {isAdminMode && (
+                  <div 
+                    onClick={(e) => e.stopPropagation()} 
+                    className="absolute bottom-3 left-3 right-3 flex items-center justify-between gap-1 z-20 bg-stone-950/95 p-1.5 rounded border border-amber-500/50 backdrop-blur-md"
+                  >
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => handleOpenEdit(member)}
+                        className="p-1 hover:bg-amber-500 hover:text-stone-950 text-amber-400 rounded text-[10px] font-mono font-bold flex items-center gap-1 transition-colors"
+                        title="Edit Member Details"
+                      >
+                        <Edit3 className="h-3 w-3" />
+                        <span>EDIT</span>
+                      </button>
+
+                      <button
+                        onClick={() => updateTeamMember({ ...member, isVisible: !member.isVisible })}
+                        className="p-1 hover:bg-stone-800 text-stone-400 hover:text-stone-200 rounded transition-colors"
+                        title={member.isVisible ? 'Hide from public view' : 'Make visible to public'}
+                      >
+                        {member.isVisible ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3 text-amber-400" />}
+                      </button>
+                    </div>
+
+                    <div className="flex items-center gap-1">
+                      {index > 0 && (
+                        <button
+                          onClick={() => handleMove(index, 'up')}
+                          className="p-1 hover:bg-stone-800 text-stone-400 hover:text-stone-200 rounded transition-colors"
+                          title="Move Left"
+                        >
+                          <ArrowUp className="h-3 w-3 transform -rotate-90" />
+                        </button>
+                      )}
+                      {index < teamMembers.length - 1 && (
+                        <button
+                          onClick={() => handleMove(index, 'down')}
+                          className="p-1 hover:bg-stone-800 text-stone-400 hover:text-stone-200 rounded transition-colors"
+                          title="Move Right"
+                        >
+                          <ArrowDown className="h-3 w-3 transform -rotate-90" />
+                        </button>
+                      )}
+                      <button
+                        onClick={() => {
+                          if (confirm(`Remove ${member.name} from atelier staff?`)) {
+                            deleteTeamMember(member.id);
+                          }
+                        }}
+                        className="p-1 hover:bg-red-950 text-stone-400 hover:text-red-400 rounded transition-colors"
+                        title="Delete Member"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    </div>
+                  </div>
                 )}
               </div>
 
-              {/* Direct Portrait Upload Button (Hover on portrait) */}
-              <button
-                onClick={() => {
-                  setInlineUploadTargetId(member.id);
-                  inlineFileInputRef.current?.click();
-                }}
-                className="absolute top-3 right-3 p-1.5 bg-stone-950/80 hover:bg-amber-500 hover:text-stone-950 text-stone-300 backdrop-blur-md rounded border border-stone-700 opacity-0 group-hover:opacity-100 transition-all z-20"
-                title="Upload new portrait image directly"
-              >
-                <Upload className="h-3.5 w-3.5" />
-              </button>
-
-              {/* Admin Quick Action Floating Bar (Only when Inline Edit is Active from Top Navbar) */}
-              {isAdminMode && (
-                <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between gap-1 z-20 bg-stone-950/95 p-1.5 rounded border border-amber-500/50 backdrop-blur-md">
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => handleOpenEdit(member)}
-                      className="p-1 hover:bg-amber-500 hover:text-stone-950 text-amber-400 rounded text-[10px] font-mono font-bold flex items-center gap-1 transition-colors"
-                      title="Edit Member Details"
-                    >
-                      <Edit3 className="h-3 w-3" />
-                      <span>EDIT</span>
-                    </button>
-
-                    <button
-                      onClick={() => updateTeamMember({ ...member, isVisible: !member.isVisible })}
-                      className="p-1 hover:bg-stone-800 text-stone-400 hover:text-stone-200 rounded transition-colors"
-                      title={member.isVisible ? 'Hide from public view' : 'Make visible to public'}
-                    >
-                      {member.isVisible ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3 text-amber-400" />}
-                    </button>
-                  </div>
-
-                  <div className="flex items-center gap-1">
-                    {index > 0 && (
+              {/* Member Info Content */}
+              <div className="p-5 flex-1 flex flex-col justify-between space-y-4 bg-stone-950/90">
+                <div className="space-y-2">
+                  <h3 
+                    onClick={() => setViewingProfileMember(member)}
+                    className="text-base font-mono font-bold text-stone-100 uppercase tracking-tight group-hover:text-amber-300 transition-colors cursor-pointer"
+                  >
+                    {member.name}
+                  </h3>
+                  <p className="text-[11px] font-mono text-amber-400/95 font-medium tracking-wide">
+                    {member.position}
+                  </p>
+                  
+                  <div className="pt-1">
+                    <p className={`text-xs font-mono text-stone-300 leading-relaxed ${isExpanded ? '' : 'line-clamp-4'}`}>
+                      {member.bio}
+                    </p>
+                    {member.bio && member.bio.length > 180 && (
                       <button
-                        onClick={() => handleMove(index, 'up')}
-                        className="p-1 hover:bg-stone-800 text-stone-400 hover:text-stone-200 rounded transition-colors"
-                        title="Move Left"
+                        type="button"
+                        onClick={() => setExpandedBioIds(prev => ({ ...prev, [member.id]: !prev[member.id] }))}
+                        className="mt-1.5 text-[10px] font-mono text-amber-400/80 hover:text-amber-300 transition-colors uppercase underline underline-offset-2"
                       >
-                        <ArrowUp className="h-3 w-3 transform -rotate-90" />
+                        {isExpanded ? 'Show Less' : 'Read Full Statement...'}
                       </button>
                     )}
-                    {index < teamMembers.length - 1 && (
-                      <button
-                        onClick={() => handleMove(index, 'down')}
-                        className="p-1 hover:bg-stone-800 text-stone-400 hover:text-stone-200 rounded transition-colors"
-                        title="Move Right"
-                      >
-                        <ArrowDown className="h-3 w-3 transform -rotate-90" />
-                      </button>
-                    )}
-                    <button
-                      onClick={() => {
-                        if (confirm(`Remove ${member.name} from atelier staff?`)) {
-                          deleteTeamMember(member.id);
-                        }
-                      }}
-                      className="p-1 hover:bg-red-950 text-stone-400 hover:text-red-400 rounded transition-colors"
-                      title="Delete Member"
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </button>
                   </div>
                 </div>
-              )}
-            </div>
 
-            {/* Member Info Content */}
-            <div className="p-4 flex-1 flex flex-col justify-between space-y-3 bg-stone-950/80">
-              <div className="space-y-1.5">
-                <h3 className="text-sm font-mono font-bold text-stone-100 uppercase tracking-tight group-hover:text-amber-300 transition-colors">
-                  {member.name}
-                </h3>
-                <p className="text-[11px] font-mono text-amber-400/90 font-medium tracking-wide">
-                  {member.position}
-                </p>
-                <p className="text-[11px] font-mono text-stone-400 leading-relaxed line-clamp-3">
-                  {member.bio}
-                </p>
-              </div>
+                {/* Social & Contact Links */}
+                <div className="pt-3 border-t border-stone-800/80 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    {member.socialLinks?.linkedin && (
+                      <a
+                        href={member.socialLinks.linkedin}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-1 text-stone-400 hover:text-amber-300 transition-colors"
+                        title="LinkedIn Profile"
+                      >
+                        <Linkedin className="h-3.5 w-3.5" />
+                      </a>
+                    )}
+                    {member.socialLinks?.instagram && (
+                      <a
+                        href={member.socialLinks.instagram}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-1 text-stone-400 hover:text-amber-300 transition-colors"
+                        title="Instagram Profile"
+                      >
+                        <Instagram className="h-3.5 w-3.5" />
+                      </a>
+                    )}
+                    {member.socialLinks?.x && (
+                      <a
+                        href={member.socialLinks.x}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-1 text-stone-400 hover:text-amber-300 transition-colors"
+                        title="X / Twitter"
+                      >
+                        <Twitter className="h-3.5 w-3.5" />
+                      </a>
+                    )}
+                    {member.socialLinks?.email && (
+                      <a
+                        href={`mailto:${member.socialLinks.email}`}
+                        className="p-1 text-stone-400 hover:text-amber-300 transition-colors"
+                        title="Direct Email"
+                      >
+                        <Mail className="h-3.5 w-3.5" />
+                      </a>
+                    )}
+                  </div>
 
-              {/* Social & Contact Links */}
-              <div className="pt-3 border-t border-stone-800/60 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  {member.socialLinks?.linkedin && (
-                    <a
-                      href={member.socialLinks.linkedin}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-1 text-stone-400 hover:text-amber-300 transition-colors"
-                      title="LinkedIn Profile"
-                    >
-                      <Linkedin className="h-3.5 w-3.5" />
-                    </a>
-                  )}
-                  {member.socialLinks?.instagram && (
-                    <a
-                      href={member.socialLinks.instagram}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-1 text-stone-400 hover:text-amber-300 transition-colors"
-                      title="Instagram Profile"
-                    >
-                      <Instagram className="h-3.5 w-3.5" />
-                    </a>
-                  )}
-                  {member.socialLinks?.x && (
-                    <a
-                      href={member.socialLinks.x}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-1 text-stone-400 hover:text-amber-300 transition-colors"
-                      title="X / Twitter"
-                    >
-                      <Twitter className="h-3.5 w-3.5" />
-                    </a>
-                  )}
-                  {member.socialLinks?.email && (
-                    <a
-                      href={`mailto:${member.socialLinks.email}`}
-                      className="p-1 text-stone-400 hover:text-amber-300 transition-colors"
-                      title="Direct Email"
-                    >
-                      <Mail className="h-3.5 w-3.5" />
-                    </a>
-                  )}
+                  <button
+                    onClick={() => setViewingProfileMember(member)}
+                    className="text-[10px] font-mono text-stone-400 hover:text-amber-400 transition-colors flex items-center gap-1 uppercase bg-stone-900/60 hover:bg-stone-800 px-2 py-1 rounded border border-stone-800"
+                  >
+                    <span>STATEMENT</span>
+                    <ExternalLink className="h-2.5 w-2.5" />
+                  </button>
                 </div>
-
-                <button
-                  onClick={() => handleOpenEdit(member)}
-                  className="text-[10px] font-mono text-stone-500 hover:text-amber-400 transition-colors flex items-center gap-1 uppercase"
-                >
-                  <span>PROFILE</span>
-                  <ExternalLink className="h-2.5 w-2.5" />
-                </button>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Add / Edit Staff Member Modal */}
@@ -621,6 +648,124 @@ export const StaffSection: React.FC<StaffSectionProps> = ({ setCursorContext }) 
               >
                 <Check className="h-4 w-4" />
                 <span>SAVE STAFF MEMBER</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Full Architectural Statement Profile Modal */}
+      {viewingProfileMember && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-950/85 backdrop-blur-md"
+          onClick={() => setViewingProfileMember(null)}
+        >
+          <div 
+            className="bg-stone-900 border border-stone-800 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 md:p-8 space-y-6 animate-in fade-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between border-b border-stone-800 pb-4">
+              <div className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
+                <span className="text-[11px] font-mono text-amber-400 font-bold uppercase tracking-wider">
+                  DISCIPLINARY LEADERSHIP & ARCHITECTS
+                </span>
+              </div>
+              <button
+                onClick={() => setViewingProfileMember(null)}
+                className="p-1.5 text-stone-400 hover:text-stone-100 hover:bg-stone-800 rounded transition-colors"
+                title="Close Modal"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="flex flex-col md:flex-row gap-6 items-start">
+              <div className="w-full md:w-52 flex-shrink-0 aspect-[3/4] rounded-sm overflow-hidden bg-stone-950 border border-stone-800">
+                <img
+                  src={viewingProfileMember.portrait}
+                  alt={viewingProfileMember.name}
+                  referrerPolicy="no-referrer"
+                  className="h-full w-full object-cover"
+                />
+              </div>
+
+              <div className="flex-1 space-y-4">
+                <div>
+                  <h3 className="text-xl md:text-2xl font-mono font-bold text-stone-100 uppercase tracking-tight">
+                    {viewingProfileMember.name}
+                  </h3>
+                  <p className="text-xs font-mono text-amber-400 font-semibold tracking-wide mt-1">
+                    {viewingProfileMember.position}
+                  </p>
+                </div>
+
+                <div className="pt-2 border-t border-stone-800/80">
+                  <h4 className="text-[10px] font-mono text-stone-400 uppercase tracking-wider mb-2">
+                    ARCHITECTURAL STATEMENT & DISCIPLINE
+                  </h4>
+                  <p className="text-xs md:text-sm font-mono text-stone-300 leading-relaxed whitespace-pre-line">
+                    {viewingProfileMember.bio}
+                  </p>
+                </div>
+
+                {/* Social & Contact */}
+                <div className="pt-4 border-t border-stone-800/80 flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    {viewingProfileMember.socialLinks?.linkedin && (
+                      <a
+                        href={viewingProfileMember.socialLinks.linkedin}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-stone-950 border border-stone-800 hover:border-amber-400/60 text-stone-300 hover:text-amber-300 text-xs font-mono rounded transition-colors"
+                      >
+                        <Linkedin className="h-3.5 w-3.5" />
+                        <span>LINKEDIN</span>
+                      </a>
+                    )}
+                    {viewingProfileMember.socialLinks?.instagram && (
+                      <a
+                        href={viewingProfileMember.socialLinks.instagram}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-stone-950 border border-stone-800 hover:border-amber-400/60 text-stone-300 hover:text-amber-300 text-xs font-mono rounded transition-colors"
+                      >
+                        <Instagram className="h-3.5 w-3.5" />
+                        <span>INSTAGRAM</span>
+                      </a>
+                    )}
+                    {viewingProfileMember.socialLinks?.x && (
+                      <a
+                        href={viewingProfileMember.socialLinks.x}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-stone-950 border border-stone-800 hover:border-amber-400/60 text-stone-300 hover:text-amber-300 text-xs font-mono rounded transition-colors"
+                      >
+                        <Twitter className="h-3.5 w-3.5" />
+                        <span>X</span>
+                      </a>
+                    )}
+                  </div>
+
+                  {viewingProfileMember.socialLinks?.email && (
+                    <a
+                      href={`mailto:${viewingProfileMember.socialLinks.email}`}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs font-mono rounded transition-colors shadow-[0_0_15px_rgba(245,158,11,0.3)]"
+                    >
+                      <Mail className="h-3.5 w-3.5" />
+                      <span>DIRECT INQUIRY</span>
+                    </a>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-stone-800 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setViewingProfileMember(null)}
+                className="px-5 py-2 bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs font-mono rounded font-semibold"
+              >
+                CLOSE PROFILE
               </button>
             </div>
           </div>

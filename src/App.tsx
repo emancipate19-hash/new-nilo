@@ -15,10 +15,19 @@ import { ContactSection } from './components/ContactSection';
 import { ProjectModal } from './components/ProjectModal';
 import { CmsModal } from './components/CmsModal';
 import { StudioPreloader } from './components/StudioPreloader';
+import { GoogleDriveFolderSyncModal } from './components/GoogleDriveFolderSyncModal';
+import { StudioAdminToolbar } from './components/StudioAdminToolbar';
 import { Compass, ArrowUp } from 'lucide-react';
 
 function MainAppContent() {
-  const { studioName, projects, sectionVisibility, footerSettings } = useStudio();
+  const {
+    studioName,
+    projects,
+    sectionVisibility,
+    footerSettings,
+    isGoogleDriveModalOpen,
+    setIsGoogleDriveModalOpen
+  } = useStudio();
 
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [fullscreenImage, setFullscreenImage] = useState<{
@@ -208,6 +217,15 @@ function MainAppContent() {
         }}
         editingProject={editingProject}
       />
+
+      {/* Google Drive Folder Synchronizer Modal */}
+      <GoogleDriveFolderSyncModal
+        isOpen={isGoogleDriveModalOpen}
+        onClose={() => setIsGoogleDriveModalOpen(false)}
+      />
+
+      {/* Floating Studio Admin Toolbar */}
+      <StudioAdminToolbar onOpenAddModal={handleOpenAddModal} />
     </div>
   );
 }

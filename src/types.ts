@@ -342,6 +342,14 @@ export interface SectionVisibility {
   footer: boolean;
 }
 
+export type ProjectAnimationPreset =
+  | 'framer-slide-fade'
+  | 'framer-spring-glide'
+  | 'gsap-stagger-slide'
+  | 'gsap-curtain-reveal'
+  | 'motion-fade-scale'
+  | 'architectural-drift';
+
 export interface ThemeSettings {
   preset: 'dark-obsidian' | 'warm-luxury' | 'monochrome' | 'cyber-blueprint';
   fontFamily: 'mono' | 'sans' | 'serif';
@@ -349,6 +357,7 @@ export interface ThemeSettings {
   neonLinesEnabled: boolean;
   smoothScroll: boolean;
   accentColor: string;
+  projectAnimationPreset?: ProjectAnimationPreset;
 }
 
 export interface SeoSettings {

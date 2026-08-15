@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Sliders, Menu, X, Camera, Edit3, Check, RefreshCw, Plus, FolderPlus } from 'lucide-react';
+import { Sliders, Menu, X, Camera, Edit3, Check, RefreshCw, Plus, FolderPlus, FolderSync } from 'lucide-react';
 import { MagneticButton } from './MagneticButton';
 import { CursorContextState } from '../types';
 import { useStudio } from '../context/StudioContext';
+import { FALLBACK_VECTOR_LOGO_URL, logoThumbnailImg } from '../assets/images/defaultAssets';
 
 interface NavbarProps {
   reducedMotion: boolean;
@@ -33,6 +34,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     isAdminMode,
     setIsAdminMode,
     setIsCmsOpen,
+    setIsGoogleDriveModalOpen,
     updateLogo,
     uploadFileAsDataUrl,
     resetToDefaults
@@ -77,11 +79,21 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Brand Logo & Studio Title */}
         <div className="flex items-center gap-3 group">
           {/* Logo container with quick hover upload */}
-          <div className="relative flex h-11 w-11 items-center justify-center rounded-full bg-slate-900 border border-amber-500/40 p-1 shadow-[0_0_15px_rgba(212,175,55,0.2)] overflow-hidden transition-transform group-hover:scale-105">
+          <div className="relative flex h-11 w-11 md:h-12 md:w-12 items-center justify-center rounded-xl bg-slate-900/95 border border-amber-500/40 p-1.5 shadow-[0_0_15px_rgba(212,175,55,0.25)] overflow-hidden transition-transform group-hover:scale-105">
             <img
               src={logoUrl}
               alt={`${studioName} Logo`}
-              className="h-full w-full object-contain rounded-full"
+              referrerPolicy="no-referrer"
+              crossOrigin="anonymous"
+              onError={(e) => {
+                const target = e.currentTarget;
+                if (target.src === logoThumbnailImg) {
+                  target.src = FALLBACK_VECTOR_LOGO_URL;
+                } else if (target.src !== FALLBACK_VECTOR_LOGO_URL) {
+                  target.src = logoThumbnailImg;
+                }
+              }}
+              className="h-full w-full object-contain"
             />
             
             {/* Logo Upload Trigger overlay */}
@@ -163,6 +175,18 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span>+ NEW PROJECT</span>
             </button>
           )}
+
+          {/* Google Drive Folder Sync Trigger */}
+          <button
+            onClick={() => setIsGoogleDriveModalOpen(true)}
+            onMouseEnter={() => setCursorContext({ mode: 'link', text: 'DRIVE' })}
+            onMouseLeave={() => setCursorContext({ mode: 'default' })}
+            className="flex items-center gap-1.5 rounded-sm px-3 py-1.5 text-[11px] font-mono border bg-amber-500/10 text-amber-300 font-bold border-amber-500/40 hover:bg-amber-400 hover:text-slate-950 transition-all shadow-[0_0_12px_rgba(245,158,11,0.15)]"
+            title="Sync & replace portfolio photos from Google Drive folder"
+          >
+            <FolderSync className="h-3.5 w-3.5" />
+            <span>DRIVE SYNC</span>
+          </button>
 
           {/* CMS Modal Trigger */}
           <button
@@ -333,6 +357,16 @@ export const Navbar: React.FC<NavbarProps> = ({
             className="block w-full text-left py-2 hover:text-amber-300 uppercase tracking-widest text-amber-300 font-bold"
           >
             WORKS SHOWCASE
+          </button>
+          <button
+            onClick={() => {
+              setIsGoogleDriveModalOpen(true);
+              setMobileMenuOpen(false);
+            }}
+            className="block w-full text-left py-2 text-amber-300 font-bold hover:text-amber-200 uppercase tracking-widest flex items-center gap-2"
+          >
+            <FolderSync className="h-4 w-4" />
+            <span>GOOGLE DRIVE FOLDER SYNC</span>
           </button>
           <button
             onClick={() => {

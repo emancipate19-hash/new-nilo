@@ -1,13 +1,48 @@
-import heroTowerImg from './https://drive.google.com/file/d/1w0TBGnf42GLmcMsK3e6I9CnRM4-Tdhrv/view?usp=drive_link';
-import terrainVillaImg from './https://drive.google.com/file/d/1dfrPI_W9-sPGg_Rfga2zAePVpN5db6_O/view?usp=drive_link';
-import lumenCenterImg from './https://drive.google.com/file/d/1TJxzDihtkze0truaNCS5cQMSqqTLCvMd/view?usp=drive_link';
-import boleTowerImg from './https://drive.google.com/file/d/1lIQ6h3TdRh_bLMy37s8ivgynmnQVqfqJ/view?usp=drive_link';
-import hawassaRetreatImg from './https://drive.google.com/file/d/1ZZmY0Re5ZcSewXmfY8td7FXzKdZjrZjm/view?usp=drive_link';
+// Google Drive Image IDs provided for NILO AXIS STUDIO assets
+export const GOOGLE_DRIVE_IDS = {
+  logo: '17Ptq0XrrfinmuuF77SWpRVcPFfBdX0VA',
+  hero: '1OkQM2tB1qLOiHvoqm68LnBQPMgnzHkR5',
+  project1: '1c7jmTOuBj9VHwxGgdaCcl5tg3SJddsjm',
+  project2: '1Fkp3YxPAUV5I1dpUCkuy7t3DUHcEirdD',
+  project3: '1gg-0dwTCHnpY7e2vQJ8gMGyhMWYtZTZI',
+  project4: '178RzJjY1nQwVjXYbqKwuvV-TQX_Y6Yoo',
+  project5: '1wMR9Eh0WAbDo6AyUTerk2Xm8ZeZcrbyP',
+  project6: '13q-5PaMirqpM705lHUNi_Z3qjUv7S_Qn',
+  project7: '1fwOR6DYVMZ58EZSL3ll88BqAQOCisJzS',
+  project8: '1I-08l62XYxJ13SaBnto6rR26hDRuCir3',
+  project9: '1OkQM2tB1qLOiHvoqm68LnBQPMgnzHkR5',
+  staffDawit: '1Vp_0adt1fIK1uHNFbaRwojtAG27roSnW',
+  staffKidus: '1I_VjQITznicS9dLapt8yS5EaGo4e9qys',
+  staffMilki: '10ErJNl9jtEAnUlL0COEICSvRlZ3IEFAQ'
+};
+
+// High-performance direct CDN URLs for Google Drive assets
+export const logoImg = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.logo}`;
+export const logoThumbnailImg = `https://drive.google.com/thumbnail?id=${GOOGLE_DRIVE_IDS.logo}&sz=w1000`;
+
+export const heroTowerImg = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.hero}`;
+export const projectImg1 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.project1}`;
+export const projectImg2 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.project2}`;
+export const projectImg3 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.project3}`;
+export const projectImg4 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.project4}`;
+export const projectImg5 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.project5}`;
+export const projectImg6 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.project6}`;
+export const projectImg7 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.project7}`;
+export const projectImg8 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.project8}`;
+export const projectImg9 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.project9}`;
+
+export const staffDawitImg = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.staffDawit}`;
+export const staffKidusImg = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.staffKidus}`;
+export const staffMilkiImg = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.staffMilki}`;
+
+// Aliases for compatibility
+export const terrainVillaImg = projectImg1;
+export const lumenCenterImg = projectImg2;
+export const boleTowerImg = projectImg3;
+export const hawassaRetreatImg = projectImg4;
 
 // Default Brand Assets for NILO AXIS STUDIO
-
-// Requirement: First uploaded picture as Company Logo (Gold 'NA' Emblem in double circle)
-export const DEFAULT_LOGO_URL = `data:image/svg+xml;utf8,${encodeURIComponent(`
+export const FALLBACK_VECTOR_LOGO_URL = `data:image/svg+xml;utf8,${encodeURIComponent(`
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
   <defs>
     <radialGradient id="bgGrad" cx="50%" cy="50%" r="50%">
@@ -30,7 +65,7 @@ export const DEFAULT_LOGO_URL = `data:image/svg+xml;utf8,${encodeURIComponent(`
     </filter>
   </defs>
 
-  <!-- Dark wood textured circular background -->
+  <!-- Dark circular background -->
   <circle cx="200" cy="200" r="190" fill="url(#bgGrad)" stroke="#111" stroke-width="4"/>
 
   <!-- Outer Gold Ring -->
@@ -53,33 +88,58 @@ export const DEFAULT_LOGO_URL = `data:image/svg+xml;utf8,${encodeURIComponent(`
 </svg>
 `)}`;
 
-// Requirement: Second uploaded picture as Hero Image (Tall luxury high-rise tower in lush green pine forest)
+// Primary Logo is the provided Google Drive Logo Asset
+export const DEFAULT_LOGO_URL = logoImg;
+
+// Hero Image
 export const DEFAULT_HERO_IMAGE_URL = heroTowerImg;
 
 // All uploaded images exported as primary default loading assets
 export const DEFAULT_UPLOADED_PICTURES = [
-  heroTowerImg,
-  terrainVillaImg,
-  lumenCenterImg,
-  boleTowerImg,
-  hawassaRetreatImg
+  logoImg,
+  projectImg1,
+  projectImg2,
+  projectImg3,
+  projectImg4,
+  projectImg5,
+  projectImg6,
+  projectImg7,
+  projectImg8,
+  projectImg9
 ];
 
 export const DEFAULT_UPLOADED_ASSETS = {
+  logo: logoImg,
   heroTower: heroTowerImg,
-  terrainVilla: terrainVillaImg,
-  lumenCenter: lumenCenterImg,
-  boleTower: boleTowerImg,
-  hawassaRetreat: hawassaRetreatImg,
-  logo: DEFAULT_LOGO_URL
+  project1: projectImg1,
+  project2: projectImg2,
+  project3: projectImg3,
+  project4: projectImg4,
+  project5: projectImg5,
+  project6: projectImg6,
+  project7: projectImg7,
+  project8: projectImg8,
+  project9: projectImg9,
+  terrainVilla: projectImg1,
+  lumenCenter: projectImg2,
+  boleTower: projectImg3,
+  hawassaRetreat: projectImg4,
+  staffDawit: staffDawitImg,
+  staffKidus: staffKidusImg,
+  staffMilki: staffMilkiImg
 };
 
 // Default loading pictures collection for all sections, galleries and fallback previews
 export const SAMPLE_PROJECT_IMAGES = [
-  heroTowerImg,
-  terrainVillaImg,
-  lumenCenterImg,
-  boleTowerImg,
-  hawassaRetreatImg
+  projectImg1,
+  projectImg2,
+  projectImg3,
+  projectImg4,
+  projectImg5,
+  projectImg6,
+  projectImg7,
+  projectImg8,
+  projectImg9
 ];
+
 

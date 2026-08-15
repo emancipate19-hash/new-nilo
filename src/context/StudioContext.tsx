@@ -20,6 +20,7 @@ import {
   CustomSection,
   SectionVisibility,
   ThemeSettings,
+  ProjectAnimationPreset,
   SeoSettings,
   SocialLink,
   FooterSettings,
@@ -32,6 +33,15 @@ import {
   DEFAULT_UPLOADED_ASSETS,
   DEFAULT_UPLOADED_PICTURES
 } from '../assets/images/defaultAssets';
+import { User } from 'firebase/auth';
+import { initAuth, googleSignIn, logout as authLogout, getAccessToken } from '../services/auth';
+import {
+  DriveFolderFile,
+  DEFAULT_DRIVE_FOLDER_ID,
+  fetchDriveFolderFiles,
+  getDriveImageUrl,
+  getDriveThumbnailUrl
+} from '../services/googleDriveService';
 
 export const INITIAL_PHILOSOPHY_BLOCKS: PhilosophyBlock[] = [
   {
@@ -104,8 +114,8 @@ export const INITIAL_SERVICES: ServiceItem[] = [
 ];
 
 export const INITIAL_CONTACT_DETAILS: ContactDetails = {
-  heading: 'COMMISSION NILO AXIS STUDIO',
-  description: 'We accept a limited number of high-end residential, commercial, and landscape architecture commissions annually to ensure meticulous design rigor and structural craftsmanship.',
+  heading: 'Our Message',
+  description: 'We believe every project begins with an idea — a vision waiting to take shape.\n\nBy bridging architecture, art, technology, and strategy, we create thoughtful spaces and compelling digital experiences that connect people, purpose, and place. From architectural concepts and spatial design to visual identities, websites, video, and digital storytelling, we approach every project with curiosity, precision, and a strong sense of aesthetics.\n\nOur goal is simple: to transform ideas into meaningful experiences that inspire, engage, and endure.',
   address: 'AXIS PLAZA, BOLE DISTRICT, ADDIS ABABA, ETHIOPIA',
   email: 'COMMISSIONS@NILOAXIS.COM',
   phone: '+251 11 892 4000',
@@ -143,37 +153,37 @@ export const INITIAL_NAV_MENU: NavMenuItem[] = [
 export const INITIAL_TEAM_MEMBERS: TeamMember[] = [
   {
     id: 'team-1',
-    name: 'ELENA NILO',
-    position: 'FOUNDING PRINCIPAL & DESIGN DIRECTOR',
-    portrait: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80',
-    bio: 'Pritzker nominee specializing in extreme-topography high-rise structures and climate-responsive kinetic envelopes.',
+    name: 'DAWIT ENDAYLALU',
+    position: 'CREATIVE DIRECTOR & DIGITAL STRATEGIST',
+    portrait: DEFAULT_UPLOADED_ASSETS.staffDawit,
+    bio: 'Bridging art, technology, and strategy to build compelling digital experiences. Specializing in graphic design, video editing, web development, and digital storytelling. With a keen eye for visual aesthetics and a deep understanding of digital ecosystems, every project—from immersive brand identities and dynamic video content to high-performing websites and engaging social media campaigns—is crafted to captivate audiences and drive measurable impact. Seamlessly blending technical execution with visionary creative direction, ideas are brought to life across every digital touchpoint.',
     socialLinks: { linkedin: 'https://linkedin.com', instagram: 'https://instagram.com' },
     isVisible: true
   },
   {
     id: 'team-2',
-    name: 'MARCUS V. AXIS',
-    position: 'PARTNER & HEAD OF STRUCTURAL INNOVATION',
-    portrait: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80',
-    bio: 'Specialist in post-tensioned volcanic concrete, parametric geometry, and high-density carbon-negative systems.',
+    name: 'KIDUS AMANUEL',
+    position: 'PRINCIPAL ARCHITECT & STRUCTURAL ENGINEER',
+    portrait: DEFAULT_UPLOADED_ASSETS.staffKidus,
+    bio: 'Precision engineering meets timeless architectural design. Extensive expertise and rigorous attention to detail are brought to every stage of the architectural process. Dedicated to translating aspirations into structural masterpieces, technical proficiency is combined with creative ingenuity. Whether designing residential sanctuaries, commercial landmarks, or public spaces, each solution is custom-tailored to deliver structural integrity, spatial efficiency, and exceptional design value.',
     socialLinks: { linkedin: 'https://linkedin.com', x: 'https://x.com' },
     isVisible: true
   },
   {
     id: 'team-3',
-    name: 'SORAIA KANJ',
-    position: 'DIRECTOR OF INTERIOR ARCHITECTURE & LIGHT',
-    portrait: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=600&q=80',
-    bio: 'Master of natural lighting choreography, bespoke monolithic timber joinery, and subterranean wellness sanctuaries.',
-    socialLinks: { instagram: 'https://instagram.com' },
+    name: 'MILKI TADESSE',
+    position: 'DESIGN DIRECTOR & SUSTAINABLE SPATIAL ARCHITECT',
+    portrait: DEFAULT_UPLOADED_ASSETS.staffMilki,
+    bio: 'Shaping spaces that inspire, endure, and connect. Driven by a passion for functional artistry, bold visions are transformed into tangible reality. With a strong commitment to sustainable design and modern aesthetics, every project is approached as a unique dialogue between the built environment and the people who inhabit it. From conceptual design to meticulous execution, the focus remains on creating spaces that harmonize beauty, purpose, and environmental responsibility.',
+    socialLinks: { instagram: 'https://instagram.com', linkedin: 'https://linkedin.com' },
     isVisible: true
   }
 ];
 
 export const INITIAL_CLIENTS: ClientItem[] = [
-  { id: 'cli-1', name: 'AMAMAN SANCTUARIES', logo: 'https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?auto=format&fit=crop&w=200&q=80', description: 'Luxury Eco-Hospitality Group', isVisible: true },
-  { id: 'cli-2', name: 'ALPINE RESIDENCES AG', logo: 'https://images.unsplash.com/photo-1516876437184-593fda40c7ce?auto=format&fit=crop&w=200&q=80', description: 'Swiss Mountain Cantilever Real Estate', isVisible: true },
-  { id: 'cli-3', name: 'METROPOLIS CIVIC FOUNDATION', logo: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=200&q=80', description: 'Public Art & Cultural Architecture Trust', isVisible: true }
+  { id: 'cli-1', name: 'AMAMAN SANCTUARIES', logo: DEFAULT_UPLOADED_ASSETS.project1, description: 'Luxury Eco-Hospitality Group', isVisible: true },
+  { id: 'cli-2', name: 'ALPINE RESIDENCES AG', logo: DEFAULT_UPLOADED_ASSETS.project2, description: 'Swiss Mountain Cantilever Real Estate', isVisible: true },
+  { id: 'cli-3', name: 'METROPOLIS CIVIC FOUNDATION', logo: DEFAULT_UPLOADED_ASSETS.project3, description: 'Public Art & Cultural Architecture Trust', isVisible: true }
 ];
 
 export const INITIAL_AWARDS: AwardItem[] = [
@@ -188,7 +198,7 @@ export const INITIAL_TESTIMONIALS: TestimonialItem[] = [
     quote: 'NILO AXIS STUDIO transformed an impossible cliff face into our signature mountain retreat. The precision of light and structural tension exceeds anything we envisioned.',
     clientName: 'HENRIK VON BERG',
     company: 'ALPINE RESIDENCES GROUP',
-    photo: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80',
+    photo: DEFAULT_UPLOADED_ASSETS.project8,
     isVisible: true
   },
   {
@@ -196,7 +206,7 @@ export const INITIAL_TESTIMONIALS: TestimonialItem[] = [
     quote: 'Working with Elena & Marcus was a masterclass in architectural rigor. Their zero-cut landscape philosophy made our gallery a global beacon for sustainable luxury.',
     clientName: 'CLARA SANTIAGO',
     company: 'DIRECTOR, METROPOLIS CULTURAL TRUST',
-    photo: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80',
+    photo: DEFAULT_UPLOADED_ASSETS.project9,
     isVisible: true
   }
 ];
@@ -271,7 +281,8 @@ export const INITIAL_THEME_SETTINGS: ThemeSettings = {
   cursorEnabled: true,
   neonLinesEnabled: true,
   smoothScroll: true,
-  accentColor: '#f59e0b'
+  accentColor: '#f59e0b',
+  projectAnimationPreset: 'framer-slide-fade'
 };
 
 export const INITIAL_SEO_SETTINGS: SeoSettings = {
@@ -453,6 +464,8 @@ interface StudioContextType extends StudioState {
   // Settings & Configuration
   updateSectionVisibility: (vis: SectionVisibility) => void;
   updateThemeSettings: (theme: ThemeSettings) => void;
+  projectAnimationPreset: ProjectAnimationPreset;
+  setProjectAnimationPreset: (preset: ProjectAnimationPreset) => void;
   updateSeoSettings: (seo: SeoSettings) => void;
   updateSocialLinks: (links: SocialLink[]) => void;
   updateFooterSettings: (footer: FooterSettings) => void;
@@ -463,9 +476,25 @@ interface StudioContextType extends StudioState {
   importBackupJSON: (jsonStr: string) => boolean;
   resetToDefaults: () => void;
   uploadFileAsDataUrl: (file: File) => Promise<string>;
+
+  // Google Drive Folder Synchronization & OAuth
+  driveFolderId: string;
+  setDriveFolderId: (id: string) => void;
+  driveFiles: DriveFolderFile[];
+  isSyncingDrive: boolean;
+  driveSyncStatus: string | null;
+  driveSyncError: string | null;
+  currentUser: User | null;
+  isDriveConnected: boolean;
+  isGoogleDriveModalOpen: boolean;
+  setIsGoogleDriveModalOpen: (open: boolean) => void;
+  handleGoogleSignIn: () => Promise<void>;
+  handleGoogleSignOut: () => Promise<void>;
+  syncGoogleDriveFolder: (folderId?: string) => Promise<boolean>;
+  applyDriveFilesToStudio: (files: DriveFolderFile[]) => void;
 }
 
-const STORAGE_KEY = 'nilo_axis_studio_state_v8';
+const STORAGE_KEY = 'nilo_axis_studio_state_v20';
 
 const StudioContext = createContext<StudioContextType | undefined>(undefined);
 
@@ -514,18 +543,52 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [isAdminMode, setIsAdminMode] = useState<boolean>(false);
   const [isCmsOpen, setIsCmsOpen] = useState<boolean>(false);
 
+  // Google Drive Integration States
+  const [driveFolderId, setDriveFolderId] = useState<string>(DEFAULT_DRIVE_FOLDER_ID);
+  const [driveFiles, setDriveFiles] = useState<DriveFolderFile[]>([]);
+  const [isSyncingDrive, setIsSyncingDrive] = useState<boolean>(false);
+  const [driveSyncStatus, setDriveSyncStatus] = useState<string | null>(null);
+  const [driveSyncError, setDriveSyncError] = useState<string | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [isGoogleDriveModalOpen, setIsGoogleDriveModalOpen] = useState<boolean>(false);
+
+  // Initialize Firebase Auth listener for Google Drive scope
+  useEffect(() => {
+    const unsubscribe = initAuth(
+      (user, token) => {
+        setCurrentUser(user);
+        if (token && driveFiles.length === 0) {
+          // Automatically try fetching the folder once authenticated
+          syncGoogleDriveFolder(driveFolderId);
+        }
+      },
+      () => {
+        setCurrentUser(null);
+      }
+    );
+    return () => {
+      if (typeof unsubscribe === 'function') unsubscribe();
+    };
+  }, [driveFolderId]);
+
   // Load persisted state on mount
   useEffect(() => {
     try {
       // Clear older version keys to ensure new default assets take effect immediately
-      ['nilo_axis_studio_state', 'nilo_axis_studio_state_v2', 'nilo_axis_studio_state_v3', 'nilo_axis_studio_state_v4', 'nilo_axis_studio_state_v5', 'nilo_axis_studio_state_v6', 'nilo_axis_studio_state_v7'].forEach(key => {
+      ['nilo_axis_studio_state', 'nilo_axis_studio_state_v2', 'nilo_axis_studio_state_v3', 'nilo_axis_studio_state_v4', 'nilo_axis_studio_state_v5', 'nilo_axis_studio_state_v6', 'nilo_axis_studio_state_v7', 'nilo_axis_studio_state_v8', 'nilo_axis_studio_state_v9'].forEach(key => {
         localStorage.removeItem(key);
       });
 
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (parsed.logoUrl) setLogoUrl(parsed.logoUrl);
+        if (parsed.logoUrl) {
+          if (parsed.logoUrl.startsWith('data:image/svg+xml')) {
+            setLogoUrl(DEFAULT_LOGO_URL);
+          } else {
+            setLogoUrl(parsed.logoUrl);
+          }
+        }
         if (parsed.heroImageUrl) {
           // If cached image is old unsplash default, use updated DEFAULT_HERO_IMAGE_URL
           if (parsed.heroImageUrl.includes('unsplash.com')) {
@@ -991,6 +1054,15 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     saveState({ themeSettings: theme });
   };
 
+  const setProjectAnimationPreset = (preset: ProjectAnimationPreset) => {
+    const updatedTheme: ThemeSettings = {
+      ...themeSettings,
+      projectAnimationPreset: preset
+    };
+    setThemeSettings(updatedTheme);
+    saveState({ themeSettings: updatedTheme });
+  };
+
   const updateSeoSettings = (seo: SeoSettings) => {
     setSeoSettings(seo);
     saveState({ seoSettings: seo });
@@ -1091,6 +1163,141 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       console.error('Failed to parse backup JSON', e);
       return false;
     }
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      setDriveSyncStatus('Connecting to Google Drive...');
+      setDriveSyncError(null);
+      const res = await googleSignIn();
+      if (res?.user) {
+        setCurrentUser(res.user);
+        setDriveSyncStatus(`Connected as ${res.user.email || 'Google User'}. Scanning folder...`);
+        await syncGoogleDriveFolder(driveFolderId);
+      }
+    } catch (err: any) {
+      console.error('Sign in failed:', err);
+      setDriveSyncError(err.message || 'Failed to sign in with Google');
+      setDriveSyncStatus(null);
+    }
+  };
+
+  const handleGoogleSignOut = async () => {
+    try {
+      await authLogout();
+      setCurrentUser(null);
+      setDriveSyncStatus('Disconnected from Google Drive.');
+    } catch (err: any) {
+      console.error('Sign out error:', err);
+    }
+  };
+
+  const syncGoogleDriveFolder = async (folderId?: string): Promise<boolean> => {
+    const targetFolder = folderId || driveFolderId || DEFAULT_DRIVE_FOLDER_ID;
+    setIsSyncingDrive(true);
+    setDriveSyncStatus(`Scanning Google Drive folder ${targetFolder}...`);
+    setDriveSyncError(null);
+
+    try {
+      const files = await fetchDriveFolderFiles(targetFolder);
+      setDriveFiles(files);
+      if (files.length > 0) {
+        setDriveSyncStatus(`Found ${files.length} photos in Google Drive folder.`);
+        // Automatically apply files to portfolio images
+        applyDriveFilesToStudio(files);
+      } else {
+        setDriveSyncStatus('Folder scanned, but no image files were detected.');
+      }
+      return true;
+    } catch (err: any) {
+      console.error('Error syncing Drive folder:', err);
+      setDriveSyncError(err.message || 'Could not fetch files from Google Drive. Please ensure you are signed in and the folder permissions allow access.');
+      setDriveSyncStatus(null);
+      return false;
+    } finally {
+      setIsSyncingDrive(false);
+    }
+  };
+
+  const applyDriveFilesToStudio = (files: DriveFolderFile[]) => {
+    if (!files || files.length === 0) return;
+
+    // Smart file categorization
+    let detectedLogo = files.find(f => /logo|emblem|brand|icon/i.test(f.name))?.directUrl;
+    let detectedHero = files.find(f => /hero|tower|main|cover|facade/i.test(f.name))?.directUrl;
+
+    if (!detectedLogo) {
+      detectedLogo = files[0].directUrl;
+    }
+    if (!detectedHero) {
+      detectedHero = files[1]?.directUrl || files[0].directUrl;
+    }
+
+    // 1. Update logo & hero
+    setLogoUrl(detectedLogo);
+    setHeroImageUrl(detectedHero);
+    setHeroSettings(prev => ({ ...prev, heroImage: detectedHero }));
+
+    // 2. Update projects with drive images
+    setProjects(prevProjects => {
+      return prevProjects.map((proj, idx) => {
+        const primaryFile = files[(idx + 1) % files.length];
+        const secondaryFile = files[(idx + 2) % files.length];
+        const floorPlanFile = files[(idx + 3) % files.length];
+        const galleryUrls = files.slice(0, Math.min(files.length, 6)).map(f => f.directUrl);
+
+        return {
+          ...proj,
+          heroImage: primaryFile.directUrl,
+          previewImage: secondaryFile ? secondaryFile.directUrl : primaryFile.directUrl,
+          floorPlan: proj.floorPlan ? {
+            ...proj.floorPlan,
+            image: floorPlanFile ? floorPlanFile.directUrl : proj.floorPlan.image
+          } : undefined,
+          galleryImages: galleryUrls.length > 0 ? galleryUrls : proj.galleryImages
+        };
+      });
+    });
+
+    // 3. Update Philosophy Blocks
+    setPhilosophyBlocks(prev => prev.map((block, i) => {
+      const file = files[(i + 2) % files.length];
+      return {
+        ...block,
+        image: file ? file.directUrl : block.image
+      };
+    }));
+
+    // 4. Update Services
+    setServicesList(prev => prev.map((srv, i) => {
+      const file = files[(i + 3) % files.length];
+      return {
+        ...srv,
+        image: file ? file.directUrl : srv.image
+      };
+    }));
+
+    // 5. Update Journal Articles
+    setJournalArticles(prev => prev.map((art, i) => {
+      const file = files[(i + 4) % files.length];
+      return {
+        ...art,
+        image: file ? file.directUrl : art.image
+      };
+    }));
+
+    // 6. Update Before/After
+    setBeforeAfterList(prev => prev.map((item, i) => {
+      const beforeFile = files[(i * 2) % files.length];
+      const afterFile = files[(i * 2 + 1) % files.length];
+      return {
+        ...item,
+        beforeImage: beforeFile ? beforeFile.directUrl : item.beforeImage,
+        afterImage: afterFile ? afterFile.directUrl : item.afterImage
+      };
+    }));
+
+    setDriveSyncStatus(`Successfully replaced all portfolio imagery with ${files.length} photos from Google Drive!`);
   };
 
   const resetToDefaults = () => {
@@ -1228,6 +1435,8 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         deleteCustomSection,
         updateSectionVisibility,
         updateThemeSettings,
+        projectAnimationPreset: themeSettings.projectAnimationPreset || 'framer-slide-fade',
+        setProjectAnimationPreset,
         updateSeoSettings,
         updateSocialLinks,
         updateFooterSettings,
@@ -1235,7 +1444,23 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         exportBackupJSON,
         importBackupJSON,
         resetToDefaults,
-        uploadFileAsDataUrl
+        uploadFileAsDataUrl,
+
+        // Google Drive Synchronization & OAuth
+        driveFolderId,
+        setDriveFolderId,
+        driveFiles,
+        isSyncingDrive,
+        driveSyncStatus,
+        driveSyncError,
+        currentUser,
+        isDriveConnected: !!currentUser,
+        isGoogleDriveModalOpen,
+        setIsGoogleDriveModalOpen,
+        handleGoogleSignIn,
+        handleGoogleSignOut,
+        syncGoogleDriveFolder,
+        applyDriveFilesToStudio
       }}
     >
       {children}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { DEFAULT_UPLOADED_PICTURES, DEFAULT_LOGO_URL } from '../assets/images/defaultAssets';
+import { DEFAULT_UPLOADED_PICTURES, DEFAULT_LOGO_URL, FALLBACK_VECTOR_LOGO_URL, logoThumbnailImg } from '../assets/images/defaultAssets';
 import { Compass, Check } from 'lucide-react';
 
 interface StudioPreloaderProps {
@@ -106,11 +106,21 @@ export const StudioPreloader: React.FC<StudioPreloaderProps> = ({ onComplete, re
           <div className="relative z-10 flex flex-col items-center max-w-md w-full text-center space-y-6">
             {/* Studio Logo Emblem */}
             <div className="relative">
-              <div className="w-24 h-24 rounded-full border border-amber-400/40 p-1.5 shadow-[0_0_30px_rgba(245,158,11,0.25)] bg-slate-900/90 backdrop-blur-md flex items-center justify-center">
+              <div className="w-24 h-24 rounded-2xl border border-amber-400/40 p-2 shadow-[0_0_30px_rgba(245,158,11,0.25)] bg-slate-900/90 backdrop-blur-md flex items-center justify-center overflow-hidden">
                 <img
                   src={DEFAULT_LOGO_URL}
                   alt="NILO AXIS Emblem"
-                  className="w-full h-full object-contain drop-shadow-md animate-pulse"
+                  referrerPolicy="no-referrer"
+                  crossOrigin="anonymous"
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    if (target.src === logoThumbnailImg) {
+                      target.src = FALLBACK_VECTOR_LOGO_URL;
+                    } else if (target.src !== FALLBACK_VECTOR_LOGO_URL) {
+                      target.src = logoThumbnailImg;
+                    }
+                  }}
+                  className="w-full h-full object-contain drop-shadow-md"
                 />
               </div>
               <div className="absolute -bottom-1 -right-1 p-1 bg-amber-500 rounded-full text-slate-950 shadow-md">
