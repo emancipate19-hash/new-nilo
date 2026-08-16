@@ -24,7 +24,18 @@ export const GOOGLE_DRIVE_IDS = {
   interior7: '1ej3mW3nJixsiVAEPVYEvPWB_q9m5lgjM',
   interior8: '1rSBM9om0BXG-X-_pj6J7fLhCo3HP6drv',
   interior9: '1Ycafha6Grb0MqPVpdnOeN4GLGmRgtXbd',
-  interior10: '1NMTHKIfDTNjk14o7s13NwyIprlzPg7RR'
+  interior10: '1NMTHKIfDTNjk14o7s13NwyIprlzPg7RR',
+  // Residential Architecture Specific Drive IDs
+  residential1: '18hBAxST0xvYKNFEDPNdY5-GshvnZVDox',
+  residential2: '137zlUWBK26fwpIezu8IryX2iZ-IiFwiZ',
+  residential3: '1F6B7EL1labzKrBBWFqsD4vh2IDd4Fp39',
+  residential4: '1OiHWECoiUs6K2XAWSKajTTypxTL5P2DZ',
+  residential5: '1a2yUqxluYKOajy80A1PdQB8lAvurrdqk',
+  residential6: '14jZGotjxAtnKgHWYRq_BhVXnIBkz5BZG',
+  residential7: '1kh9LbepW81F61MvpBKdBrEF5t1IED-Vi',
+  residential8: '1BO1gWpq8sCKzZps1uNlQN8JVsraTLm_b',
+  residential9: '1a8keknMPxs7UXkedjhs4Pqe4fj-kqsYu',
+  residential10: '1TYoICSf-mJUhi8XUrfpW78hRjWzz9_rS'
 };
 
 // High-performance direct CDN URLs for Google Drive assets
@@ -67,15 +78,40 @@ export const INTERIOR_DESIGN_IMAGES = [
   interiorImg10
 ];
 
+// Residential Architecture Images
+export const residentialImg1 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.residential1}`;
+export const residentialImg2 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.residential2}`;
+export const residentialImg3 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.residential3}`;
+export const residentialImg4 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.residential4}`;
+export const residentialImg5 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.residential5}`;
+export const residentialImg6 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.residential6}`;
+export const residentialImg7 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.residential7}`;
+export const residentialImg8 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.residential8}`;
+export const residentialImg9 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.residential9}`;
+export const residentialImg10 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.residential10}`;
+
+export const RESIDENTIAL_ARCHITECTURE_IMAGES = [
+  residentialImg1,
+  residentialImg2,
+  residentialImg3,
+  residentialImg4,
+  residentialImg5,
+  residentialImg6,
+  residentialImg7,
+  residentialImg8,
+  residentialImg9,
+  residentialImg10
+];
+
 export const staffDawitImg = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.staffDawit}`;
 export const staffKidusImg = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.staffKidus}`;
 export const staffMilkiImg = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.staffMilki}`;
 
 // Aliases for compatibility
-export const terrainVillaImg = projectImg1;
+export const terrainVillaImg = residentialImg1;
 export const lumenCenterImg = projectImg2;
 export const boleTowerImg = projectImg3;
-export const hawassaRetreatImg = projectImg4;
+export const hawassaRetreatImg = residentialImg2;
 
 // Default Brand Assets for NILO AXIS STUDIO
 export const FALLBACK_VECTOR_LOGO_URL = `data:image/svg+xml;utf8,${encodeURIComponent(`
@@ -166,10 +202,20 @@ export const DEFAULT_UPLOADED_ASSETS = {
   interior8: interiorImg8,
   interior9: interiorImg9,
   interior10: interiorImg10,
-  terrainVilla: projectImg1,
+  residential1: residentialImg1,
+  residential2: residentialImg2,
+  residential3: residentialImg3,
+  residential4: residentialImg4,
+  residential5: residentialImg5,
+  residential6: residentialImg6,
+  residential7: residentialImg7,
+  residential8: residentialImg8,
+  residential9: residentialImg9,
+  residential10: residentialImg10,
+  terrainVilla: residentialImg1,
   lumenCenter: projectImg2,
   boleTower: projectImg3,
-  hawassaRetreat: projectImg4,
+  hawassaRetreat: residentialImg2,
   staffDawit: staffDawitImg,
   staffKidus: staffKidusImg,
   staffMilki: staffMilkiImg

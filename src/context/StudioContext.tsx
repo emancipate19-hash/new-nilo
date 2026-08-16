@@ -494,7 +494,7 @@ interface StudioContextType extends StudioState {
   applyDriveFilesToStudio: (files: DriveFolderFile[]) => void;
 }
 
-const STORAGE_KEY = 'nilo_axis_studio_state_v26';
+const STORAGE_KEY = 'nilo_axis_studio_state_v27';
 
 const StudioContext = createContext<StudioContextType | undefined>(undefined);
 

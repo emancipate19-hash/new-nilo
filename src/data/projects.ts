@@ -20,6 +20,16 @@ import {
   interiorImg8,
   interiorImg9,
   interiorImg10,
+  residentialImg1,
+  residentialImg2,
+  residentialImg3,
+  residentialImg4,
+  residentialImg5,
+  residentialImg6,
+  residentialImg7,
+  residentialImg8,
+  residentialImg9,
+  residentialImg10,
   staffDawitImg,
   staffKidusImg,
   staffMilkiImg
@@ -135,9 +145,9 @@ export const PROJECTS: Project[] = [
     location: 'ENTOTO RIDGE, ADDIS ABABA',
     year: '2026',
     category: 'Residential Architecture',
-    heroImage: projectImg1,
-    previewImage: projectImg1,
-    galleryImages: [projectImg1, projectImg2, projectImg3, projectImg4, projectImg5, projectImg6],
+    heroImage: residentialImg1,
+    previewImage: residentialImg1,
+    galleryImages: [residentialImg1, residentialImg2, residentialImg3, residentialImg4, residentialImg5, residentialImg6, residentialImg7, residentialImg8, residentialImg9, residentialImg10],
     description: 'Suspended dramatically over the Entoto hillside, the Terrain Cantilever Villa negotiates extreme topography through post-tensioned concrete slabs and triple-glazed curtain walls projecting 14 meters into open air without vertical ground supports.',
     concept: 'Form following topography—minimizing ground footprint while maximizing passive wind capture and panoramic valley vistas.',
     specs: {
@@ -150,7 +160,7 @@ export const PROJECTS: Project[] = [
     },
     floorPlan: {
       title: 'LEVEL 02 — CANTILEVER SUITE & ATRIUM',
-      image: projectImg1,
+      image: residentialImg1,
       spots: [
         {
           id: 'cantilever-deck',
@@ -176,9 +186,9 @@ export const PROJECTS: Project[] = [
     location: 'HAWASSA, ETHIOPIA',
     year: '2026',
     category: 'Residential Architecture',
-    heroImage: projectImg4,
-    previewImage: projectImg4,
-    galleryImages: [projectImg4, projectImg5, projectImg6, projectImg7, projectImg8],
+    heroImage: residentialImg2,
+    previewImage: residentialImg2,
+    galleryImages: [residentialImg2, residentialImg3, residentialImg4, residentialImg5, residentialImg6, residentialImg7, residentialImg8, residentialImg9, residentialImg10, residentialImg1],
     description: 'Constructed from site-sourced volcanic soil and rammed earth, the Hawassa Lake Residence merges tactile earthiness with sleek modern glass planes floating directly above the lake edge.',
     concept: 'Earth, timber, and water in quiet equilibrium. Low horizon silhouettes preserving the natural wetland shoreline.',
     specs: {
@@ -191,7 +201,7 @@ export const PROJECTS: Project[] = [
     },
     floorPlan: {
       title: 'WATERFRONT DECK & LIVING SANCTUARY',
-      image: projectImg4,
+      image: residentialImg2,
       spots: [
         {
           id: 'floating-deck',
@@ -206,6 +216,326 @@ export const PROJECTS: Project[] = [
     highlights: [
       '100% locally sourced site soil used for rammed earth construction',
       'Off-grid solar and greywater bio-wetland filtration system'
+    ]
+  },
+  {
+    id: 'entoto-cliffside-monolith',
+    number: '04B',
+    title: 'ENTOTO CLIFFSIDE MONOLITH',
+    subtitle: 'Tiered Concrete Volumes & Suspended Terraces',
+    location: 'ADDIS ABABA, ETHIOPIA',
+    year: '2026',
+    category: 'Residential Architecture',
+    heroImage: residentialImg3,
+    previewImage: residentialImg3,
+    galleryImages: [residentialImg3, residentialImg4, residentialImg5, residentialImg6, residentialImg7, residentialImg8, residentialImg9, residentialImg10, residentialImg1, residentialImg2],
+    description: 'A multi-tiered private residence anchored into the hillside bedrock, featuring cascading landscaped roofs, deep shaded cantilevers, and high-altitude thermal buffer zones.',
+    concept: 'Harmonious descent into the mountain landscape with stepped volumetric massing.',
+    specs: {
+      area: '760 SQ. M',
+      structuralType: 'Cascading Reinforced Concrete & Structural Basalt Piles',
+      materials: ['Textured Concrete', 'Basalt Masonry', 'Low-Iron Facade Glass', 'Weathered Zinc'],
+      timeline: '18 MONTHS',
+      status: 'COMPLETED',
+      climateStrategy: 'Earth-sheltered rear wall assemblies minimizing heat loss during mountain night hours.'
+    },
+    floorPlan: {
+      title: 'UPPER OBSERVATION LEVEL & LIVING SALON',
+      image: residentialImg3,
+      spots: [
+        {
+          id: 'cliff-terrace',
+          label: 'PANORAMIC CLIFF TERRACE',
+          description: 'Cantilevered terrace overlooking the south ridge with perimeter infinity reflection pool.',
+          area: '160 SQ. M',
+          x: 48,
+          y: 45
+        }
+      ]
+    },
+    highlights: [
+      'Deep cantilever eaves engineered to block high summer solar radiation',
+      'Integrated geothermal ground loops coupled with radiant underfloor heating'
+    ]
+  },
+  {
+    id: 'highland-zenith-villa',
+    number: '04C',
+    title: 'HIGHLAND ZENITH VILLA',
+    subtitle: 'Sculptured Rooflines & Continuous Glazed Envelopes',
+    location: 'ADDIS ABABA, ETHIOPIA',
+    year: '2026',
+    category: 'Residential Architecture',
+    heroImage: residentialImg4,
+    previewImage: residentialImg4,
+    galleryImages: [residentialImg4, residentialImg5, residentialImg6, residentialImg7, residentialImg8, residentialImg9, residentialImg10, residentialImg1, residentialImg2, residentialImg3],
+    description: 'An aerodynamic residential masterpiece featuring continuous double-curved roof profiles that deflect high-altitude winds while capturing maximum daylight and valley panoramas.',
+    concept: 'Aerodynamic spatial geometry embracing highland atmospheric currents and light.',
+    specs: {
+      area: '890 SQ. M',
+      structuralType: 'Curvilinear Steel Truss & Precast White Concrete Elements',
+      materials: ['Curved Zinc Roofing', 'Architectural Timber Slatting', 'Ultra-Clear Glazing', 'Honed Slate'],
+      timeline: '20 MONTHS',
+      status: 'COMPLETED',
+      climateStrategy: 'Aerodynamic roof form channeling natural ventilation stack effects across all levels.'
+    },
+    floorPlan: {
+      title: 'MAIN PAVILION & GRAND ATRIUM',
+      image: residentialImg4,
+      spots: [
+        {
+          id: 'zenith-atrium',
+          label: 'DOUBLE-HEIGHT LIGHT ATRIUM',
+          description: 'Central living atrium framed by 8-meter floor-to-ceiling panoramic glass panels.',
+          area: '210 SQ. M',
+          x: 52,
+          y: 40
+        }
+      ]
+    },
+    highlights: [
+      'Custom curved zinc standing-seam roof with integrated solar PV arrays',
+      'Structural glass corner windows with zero vertical mullions'
+    ]
+  },
+  {
+    id: 'botanical-courtyard-residence',
+    number: '04D',
+    title: 'BOTANICAL COURTYARD RESIDENCE',
+    subtitle: 'Central Flora Atrium & Introspective Living Cloister',
+    location: 'ADDIS ABABA, ETHIOPIA',
+    year: '2026',
+    category: 'Residential Architecture',
+    heroImage: residentialImg5,
+    previewImage: residentialImg5,
+    galleryImages: [residentialImg5, residentialImg6, residentialImg7, residentialImg8, residentialImg9, residentialImg10, residentialImg1, residentialImg2, residentialImg3, residentialImg4],
+    description: 'Conceived as an introspective domestic sanctuary, the home wraps around a lush, bioclimatic central courtyard filled with endemic flora, reflective stone pools, and shaded verandas.',
+    concept: 'Inward serenity—creating private natural microclimates within urban residential density.',
+    specs: {
+      area: '680 SQ. M',
+      structuralType: 'Post-Tensioned Concrete Frame & Timber Post-and-Beam Cloister',
+      materials: ['Fluted Concrete', 'Oiled Teak Cladding', 'Black Basalt', 'Acoustic Glass'],
+      timeline: '15 MONTHS',
+      status: 'COMPLETED',
+      climateStrategy: 'Courtyard evaporative microclimate cooling ambient air by 4.5°C naturally.'
+    },
+    floorPlan: {
+      title: 'CLOISTER LEVEL & INNER SANCTUARY',
+      image: residentialImg5,
+      spots: [
+        {
+          id: 'inner-garden',
+          label: 'CENTRAL BIOCLIMATIC CLOISTER',
+          description: 'Protected open-air courtyard garden providing passive cooling and tranquil focal views.',
+          area: '180 SQ. M',
+          x: 50,
+          y: 50
+        }
+      ]
+    },
+    highlights: [
+      '100% permeable courtyard ground surface with subsurface rainwater reservoirs',
+      'Motorized louvered roof panels modulating rain, sun, and airflow over the garden'
+    ]
+  },
+  {
+    id: 'cantilevered-ridge-estate',
+    number: '04E',
+    title: 'CANTILEVERED RIDGE ESTATE',
+    subtitle: 'Floating Volumes & Precision Structural Engineering',
+    location: 'ADDIS ABABA, ETHIOPIA',
+    year: '2026',
+    category: 'Residential Architecture',
+    heroImage: residentialImg6,
+    previewImage: residentialImg6,
+    galleryImages: [residentialImg6, residentialImg7, residentialImg8, residentialImg9, residentialImg10, residentialImg1, residentialImg2, residentialImg3, residentialImg4, residentialImg5],
+    description: 'A striking architectural statement balancing bold cantilevered upper floor volumes over a transparent glass ground floor, establishing visual weightlessness against natural slopes.',
+    concept: 'Defying gravity through high-performance composite structural engineering.',
+    specs: {
+      area: '940 SQ. M',
+      structuralType: 'Structural Steel Outrigger & Post-Tensioned Monolith Slabs',
+      materials: ['Charred Cedar Panels', 'Brushed Bronze Metal', 'High-Performance Glazing', 'Raw Concrete'],
+      timeline: '21 MONTHS',
+      status: 'COMPLETED',
+      climateStrategy: 'Overhanging upper volumes provide natural shade for lower glass facades.'
+    },
+    floorPlan: {
+      title: 'CANTILEVERED UPPER WING & SUITES',
+      image: residentialImg6,
+      spots: [
+        {
+          id: 'sky-lounge',
+          label: 'SUSPENDED SKY SALON',
+          description: 'Upper cantilevered lounge projecting 12m over the garden slope with 270° views.',
+          area: '140 SQ. M',
+          x: 44,
+          y: 38
+        }
+      ]
+    },
+    highlights: [
+      '12-meter unbraced cantilevered living box with floor-to-ceiling glass end wall',
+      'Integrated acoustic vibration dampers ensuring absolute structural stiffness'
+    ]
+  },
+  {
+    id: 'tectonic-stone-sanctuary',
+    number: '04F',
+    title: 'TECTONIC STONE RESIDENTIAL SANCTUARY',
+    subtitle: 'Hand-Hewn Basalt & Warm Minimalist Craftsmanship',
+    location: 'ADDIS ABABA, ETHIOPIA',
+    year: '2026',
+    category: 'Residential Architecture',
+    heroImage: residentialImg7,
+    previewImage: residentialImg7,
+    galleryImages: [residentialImg7, residentialImg8, residentialImg9, residentialImg10, residentialImg1, residentialImg2, residentialImg3, residentialImg4, residentialImg5, residentialImg6],
+    description: 'A fortress of tranquility sculpted from locally quarried hand-dressed stone, framed by bronze anodized accents and serene Japanese-inspired reflection gardens.',
+    concept: 'Mass, permanence, and silence—honoring geological materials and artisanal masonry.',
+    specs: {
+      area: '810 SQ. M',
+      structuralType: 'Load-Bearing Basalt Masonry & Post-Tensioned Roof Slabs',
+      materials: ['Hand-Chiseled Basalt', 'Smoked Oak', 'Bronze Anodized Aluminum', 'Thermal Glazing'],
+      timeline: '19 MONTHS',
+      status: 'COMPLETED',
+      climateStrategy: 'High-density masonry walls providing unmatched acoustic isolation and thermal inertia.'
+    },
+    floorPlan: {
+      title: 'STONE COURTYARD & GALLERY HALL',
+      image: residentialImg7,
+      spots: [
+        {
+          id: 'stone-sanctum',
+          label: 'MONOLITHIC LIVING ROTUNDA',
+          description: 'Circular living room wrapped in hand-laid basalt with circular central skylight.',
+          area: '115 SQ. M',
+          x: 46,
+          y: 48
+        }
+      ]
+    },
+    highlights: [
+      'Locally sourced stone reducing embodied carbon by 58% compared to imported cladding',
+      'Artisanal hand-chiseled surface textures by master local stonemasons'
+    ]
+  },
+  {
+    id: 'modern-atrium-dwelling',
+    number: '04G',
+    title: 'MODERN ATRIUM DWELLING',
+    subtitle: 'Transparent Volumes, Steel Precision & Light Sculptures',
+    location: 'ADDIS ABABA, ETHIOPIA',
+    year: '2026',
+    category: 'Residential Architecture',
+    heroImage: residentialImg8,
+    previewImage: residentialImg8,
+    galleryImages: [residentialImg8, residentialImg9, residentialImg10, residentialImg1, residentialImg2, residentialImg3, residentialImg4, residentialImg5, residentialImg6, residentialImg7],
+    description: 'A light-filled contemporary dwelling featuring open double-height volumes, exposed slender steel structures, and floating interior mezzanine bridges.',
+    concept: 'Dematerializing boundaries between indoor comfort and atmospheric sky views.',
+    specs: {
+      area: '720 SQ. M',
+      structuralType: 'Precision Structural Steel Skeleton & Opti-White Curtain Wall',
+      materials: ['Structural Steel', 'Opti-White Low-E Glass', 'Rift White Oak', 'Cast Terrazzo'],
+      timeline: '16 MONTHS',
+      status: 'COMPLETED',
+      climateStrategy: 'Automated solar-tracking interior micro-blinds reducing cooling load by 35%.'
+    },
+    floorPlan: {
+      title: 'GREAT HALL & MEZZANINE BRIDGE',
+      image: residentialImg8,
+      spots: [
+        {
+          id: 'glass-bridge',
+          label: 'SUSPENDED MEZZANINE BRIDGE',
+          description: 'Glass-floored aerial walkway linking private family suites across the double-height hall.',
+          area: '35 SQ. M',
+          x: 52,
+          y: 35
+        }
+      ]
+    },
+    highlights: [
+      'Slender 100mm steel columns supporting open 14-meter clear-span living volumes',
+      'Integrated home automation controlling natural daylighting, temperature, and ventilation'
+    ]
+  },
+  {
+    id: 'panoramic-horizon-villa',
+    number: '04H',
+    title: 'PANORAMIC HORIZON VILLA',
+    subtitle: 'Horizontal Ribbon Architecture & Infinity Living',
+    location: 'ADDIS ABABA, ETHIOPIA',
+    year: '2026',
+    category: 'Residential Architecture',
+    heroImage: residentialImg9,
+    previewImage: residentialImg9,
+    galleryImages: [residentialImg9, residentialImg10, residentialImg1, residentialImg2, residentialImg3, residentialImg4, residentialImg5, residentialImg6, residentialImg7, residentialImg8],
+    description: 'Low-slung horizontal architecture extending along natural ridgeline contours, featuring endless floor-to-ceiling glass horizons, wide cantilevered eaves, and private reflection pools.',
+    concept: 'Celebrating the horizontal plane as the most peaceful architectural posture.',
+    specs: {
+      area: '860 SQ. M',
+      structuralType: 'Post-Tensioned Horizontal Monolith Slabs & Slim Steel Posts',
+      materials: ['Honed Travertine', 'Custom Black Anodized Aluminum', 'Clear Solar Control Glass'],
+      timeline: '17 MONTHS',
+      status: 'COMPLETED',
+      climateStrategy: 'Overhanging roof eaves designed precisely for regional sun angles.'
+    },
+    floorPlan: {
+      title: 'HORIZON DECK & RESIDENTIAL SUITES',
+      image: residentialImg9,
+      spots: [
+        {
+          id: 'horizon-pool',
+          label: 'INFINITY REFLECTION POOL',
+          description: '25-meter linear black granite reflection pool merging with the horizon sky line.',
+          area: '150 SQ. M',
+          x: 40,
+          y: 60
+        }
+      ]
+    },
+    highlights: [
+      'Zero-threshold pocket sliding doors opening 18 meters of living room completely to nature',
+      'Geothermal pool heating powered by on-site solar photovoltaic collectors'
+    ]
+  },
+  {
+    id: 'sculpted-monolithic-manor',
+    number: '04I',
+    title: 'SCULPTED MONOLITHIC RESIDENCE',
+    subtitle: 'Timeless Volumetric Massing & Private Estate Sanctuary',
+    location: 'ADDIS ABABA, ETHIOPIA',
+    year: '2026',
+    category: 'Residential Architecture',
+    heroImage: residentialImg10,
+    previewImage: residentialImg10,
+    galleryImages: [residentialImg10, residentialImg1, residentialImg2, residentialImg3, residentialImg4, residentialImg5, residentialImg6, residentialImg7, residentialImg8, residentialImg9],
+    description: 'An imposing yet deeply refined residential estate composed of sculptured cast-in-place architectural concrete blocks, recessed shaded loggias, and grand double-height family spaces.',
+    concept: 'Sculptural permanence rooted in contemporary architectural elegance.',
+    specs: {
+      area: '1,100 SQ. M',
+      structuralType: 'Cast-In-Place White Architectural Concrete & Steel Framing',
+      materials: ['White Architectural Concrete', 'Dark Bronze Facets', 'Italian Marble', 'Fluted Teak'],
+      timeline: '24 MONTHS',
+      status: 'COMPLETED',
+      climateStrategy: 'Double-skin thermal envelope with ventilated facade cavities for optimum temperature stability.'
+    },
+    floorPlan: {
+      title: 'GRAND SALON & PRIVATE ESTATE GROUNDS',
+      image: residentialImg10,
+      spots: [
+        {
+          id: 'grand-salon',
+          label: 'SCULPTED CENTRAL LOGGIA',
+          description: 'Recessed shaded outdoor living loggia opening onto landscaped private estate grounds.',
+          area: '190 SQ. M',
+          x: 50,
+          y: 45
+        }
+      ]
+    },
+    highlights: [
+      'Bespoke architectural white concrete mix with aggregate from local riverbeds',
+      'Full smart micro-grid with battery backup ensuring 100% off-grid reliability'
     ]
   },
 
