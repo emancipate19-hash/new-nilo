@@ -3,20 +3,17 @@ import { MagneticButton } from './MagneticButton';
 import { CursorContextState } from '../types';
 import { 
   Send, 
-  MapPin, 
   CheckCircle2, 
   Sparkles, 
-  Phone, 
   Mail, 
   Edit2, 
   Check, 
   Upload, 
   FileText, 
   X, 
-  MessageSquare,
-  Building2,
-  Layers,
-  Paperclip
+  AlertCircle,
+  Clock,
+  DollarSign
 } from 'lucide-react';
 import { useStudio } from '../context/StudioContext';
 
@@ -42,14 +39,13 @@ const SERVICE_OPTIONS = [
   'Video Editing',
   'Web Development',
   'Digital Storytelling',
-  'Social Media / Digital Campaigns',
-  'Other'
+  'Social Media / Digital Campaigns'
 ];
 
 const CONTACT_METHODS = [
   'Email',
-  'Phone',
-  'WhatsApp'
+  'WhatsApp',
+  'Telegram'
 ];
 
 interface UploadedFileItem {
@@ -64,24 +60,32 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ setCursorContext
   const { studioName, contactDetails, updateContactDetails, isAdminMode, addInquirySubmission } = useStudio();
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [isEditingContact, setIsEditingContact] = useState(false);
-  const [contactForm, setContactForm] = useState(contactDetails);
+  const [contactForm, setContactForm] = useState({
+    heading: contactDetails.heading || 'Our Message',
+    description: contactDetails.description || '',
+    email: contactDetails.email || 'niloaxisstudio@gmail.com'
+  });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
 
   // Form State
   const [name, setName] = useState('');
-  const [contactInfo, setContactInfo] = useState(''); // Email / Phone
+  const [email, setEmail] = useState('');
+  const [budget, setBudget] = useState('');
+  const [timeline, setTimeline] = useState('');
   const [clientType, setClientType] = useState<string>('New Client');
   const [selectedServices, setSelectedServices] = useState<string[]>(['Architectural Design']);
   const [projectDescription, setProjectDescription] = useState('');
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFileItem[]>([]);
   const [preferredContact, setPreferredContact] = useState<string>('Email');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const toggleService = (service: string) => {
     setSelectedServices(prev => 
       prev.includes(service)
-        ? prev.filter(s => s !== service)
+        ? (prev.length > 1 ? prev.filter(s => s !== service) : prev)
         : [...prev, service]
     );
   };
@@ -131,50 +135,126 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ setCursorContext
     setUploadedFiles(prev => prev.filter(f => f.id !== id));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Prevent duplicate submissions
+    if (isSubmitting) return;
+
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    // 1. Validate the form
+    const trimmedName = name.trim();
+    const trimmedEmail = email.trim();
+    const trimmedMessage = projectDescription.trim();
+
+    if (!trimmedName) {
+      setErrorMessage('Please provide your name.');
+      return;
+    }
+
+    if (!trimmedEmail || !trimmedEmail.includes('@')) {
+      setErrorMessage('Please provide a valid email address.');
+      return;
+    }
+
+    if (!trimmedMessage) {
+      setErrorMessage('Please describe what you want to create.');
+      return;
+    }
+
+    // 2. Show "Sending Request…" and disable the button
     setIsSubmitting(true);
 
-    const isEmail = contactInfo.includes('@');
-    
-    // Save to context inquiries
-    addInquirySubmission({
-      name,
-      email: isEmail ? contactInfo : (contactInfo || 'N/A'),
-      phone: !isEmail ? contactInfo : '',
-      projectType: selectedServices.join(', ') || 'Custom Project',
-      budget: clientType,
-      location: `Preferred: ${preferredContact}`,
-      message: `[Client Type: ${clientType}]\n[Services: ${selectedServices.join(', ')}]\n[Contact: ${contactInfo} via ${preferredContact}]\n[Files: ${uploadedFiles.map(f => f.name).join(', ') || 'None'}]\n\n${projectDescription}`,
-      answers: {
-        clientType,
-        services: selectedServices.join(', '),
-        preferredContactMethod: preferredContact,
-        filesAttached: uploadedFiles.map(f => f.name).join(', ')
-      }
-    });
+    try {
+      const projectTypeStr = selectedServices.join(', ');
+      
+      const payload = {
+        name: trimmedName,
+        email: trimmedEmail,
+        projectType: projectTypeStr,
+        budget: budget.trim(),
+        timeline: timeline.trim(),
+        clientType: clientType,
+        preferredContact: preferredContact,
+        message: trimmedMessage + (uploadedFiles.length > 0 ? `\n[Attachments: ${uploadedFiles.map(f => f.name).join(', ')}]` : '')
+      };
 
-    setTimeout(() => {
-      setIsSubmitting(false);
+      // 3. Send form data to backend API
+      const res = await fetch('/api/project-request', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok || data.success === false) {
+        throw new Error(data.error || 'Something went wrong. Please try again.');
+      }
+
+      // Save to local context inquiries
+      addInquirySubmission({
+        name: trimmedName,
+        email: trimmedEmail,
+        phone: '',
+        projectType: projectTypeStr,
+        budget: budget || clientType,
+        location: `Contact via ${preferredContact}`,
+        message: payload.message,
+        answers: {
+          clientType,
+          services: projectTypeStr,
+          budget: budget || 'Not specified',
+          timeline: timeline || 'Flexible',
+          preferredContactMethod: preferredContact,
+          filesAttached: uploadedFiles.map(f => f.name).join(', ')
+        }
+      });
+
+      // 5. After successful Telegram delivery, show: "Project request sent successfully."
+      setSuccessMessage('Project request sent successfully.');
       setFormSubmitted(true);
-    }, 400);
+    } catch (err: any) {
+      console.error('Submission error:', err);
+      // 6. If it fails, show: "Something went wrong. Please try again."
+      setErrorMessage('Something went wrong. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleResetForm = () => {
     setName('');
-    setContactInfo('');
+    setEmail('');
+    setBudget('');
+    setTimeline('');
     setClientType('New Client');
     setSelectedServices(['Architectural Design']);
     setProjectDescription('');
     setUploadedFiles([]);
     setPreferredContact('Email');
     setFormSubmitted(false);
+    setErrorMessage(null);
+    setSuccessMessage(null);
   };
 
   const handleSaveContact = () => {
-    updateContactDetails(contactForm);
+    updateContactDetails({
+      ...contactDetails,
+      heading: contactForm.heading,
+      description: contactForm.description,
+      email: contactForm.email || 'niloaxisstudio@gmail.com',
+      address: '',
+      phone: ''
+    });
     setIsEditingContact(false);
   };
+
+  const displayEmail = contactDetails.email || 'niloaxisstudio@gmail.com';
 
   return (
     <section id="contact" className="my-20 py-16 border-t border-stone-800/80">
@@ -191,7 +271,11 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ setCursorContext
             {isAdminMode && !isEditingContact && (
               <button
                 onClick={() => {
-                  setContactForm(contactDetails);
+                  setContactForm({
+                    heading: contactDetails.heading || 'Our Message',
+                    description: contactDetails.description || '',
+                    email: contactDetails.email || 'niloaxisstudio@gmail.com'
+                  });
                   setIsEditingContact(true);
                 }}
                 className="flex items-center gap-1 text-xs font-mono text-amber-400 hover:underline"
@@ -219,30 +303,17 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ setCursorContext
                 </p>
               </div>
 
-              {/* Direct Atelier Details */}
+              {/* Direct Atelier Details (Email Only) */}
               <div className="space-y-4 pt-8 border-t border-stone-800/80 text-xs font-mono text-stone-300">
-                <div className="flex items-start gap-3">
-                  <MapPin className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
-                  <div>
-                    <span className="block text-[10px] text-stone-500 uppercase">ATELIER LOCATION</span>
-                    <span>{contactDetails.address || 'AXIS PLAZA, BOLE DISTRICT, ADDIS ABABA, ETHIOPIA'}</span>
-                  </div>
-                </div>
                 <div className="flex items-start gap-3">
                   <Mail className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
                   <div>
-                    <span className="block text-[10px] text-stone-500 uppercase">DIRECT INQUIRIES</span>
-                    <a href={`mailto:${contactDetails.email || 'COMMISSIONS@NILOAXIS.COM'}`} className="hover:text-amber-300 transition-colors">
-                      {contactDetails.email || 'COMMISSIONS@NILOAXIS.COM'}
-                    </a>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <Phone className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
-                  <div>
-                    <span className="block text-[10px] text-stone-500 uppercase">STUDIO PHONE</span>
-                    <a href={`tel:${contactDetails.phone || '+251 11 892 4000'}`} className="hover:text-amber-300 transition-colors">
-                      {contactDetails.phone || '+251 11 892 4000'}
+                    <span className="block text-[10px] text-stone-500 uppercase tracking-wider">DIRECT EMAIL INQUIRIES</span>
+                    <a 
+                      href={`mailto:${displayEmail}`} 
+                      className="text-stone-100 hover:text-amber-300 transition-colors font-bold text-sm tracking-wide"
+                    >
+                      {displayEmail}
                     </a>
                   </div>
                 </div>
@@ -250,7 +321,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ setCursorContext
             </div>
           ) : (
             <div className="p-6 bg-stone-900 border border-amber-500/50 rounded-sm space-y-4 shadow-2xl">
-              <h3 className="text-xs font-mono font-bold text-amber-300 uppercase">Edit Our Message & Contact Info</h3>
+              <h3 className="text-xs font-mono font-bold text-amber-300 uppercase">Edit Our Message & Email</h3>
               <div>
                 <label className="block text-[10px] font-mono text-stone-400 mb-1">HEADING TITLE</label>
                 <input
@@ -270,29 +341,11 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ setCursorContext
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-mono text-stone-400 mb-1">ADDRESS</label>
+                <label className="block text-[10px] font-mono text-stone-400 mb-1">EMAIL ADDRESS</label>
                 <input
-                  type="text"
-                  value={contactForm.address}
-                  onChange={(e) => setContactForm({ ...contactForm, address: e.target.value })}
-                  className="w-full bg-stone-950 border border-stone-700 p-2 text-xs font-mono text-stone-100 rounded-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-[10px] font-mono text-stone-400 mb-1">EMAIL</label>
-                <input
-                  type="text"
+                  type="email"
                   value={contactForm.email}
                   onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
-                  className="w-full bg-stone-950 border border-stone-700 p-2 text-xs font-mono text-stone-100 rounded-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-[10px] font-mono text-stone-400 mb-1">PHONE</label>
-                <input
-                  type="text"
-                  value={contactForm.phone}
-                  onChange={(e) => setContactForm({ ...contactForm, phone: e.target.value })}
                   className="w-full bg-stone-950 border border-stone-700 p-2 text-xs font-mono text-stone-100 rounded-sm"
                 />
               </div>
@@ -322,15 +375,15 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ setCursorContext
                 <CheckCircle2 className="h-8 w-8" />
               </div>
               <h3 className="text-2xl font-mono font-bold text-stone-100 uppercase tracking-tight">
-                PROJECT REQUEST TRANSMITTED
+                Project request sent successfully.
               </h3>
               <p className="text-xs md:text-sm font-mono text-stone-300 max-w-lg mx-auto leading-relaxed">
-                Thank you for sharing your vision with {studioName}. We have received your project parameters and uploaded materials. Our disciplinary directors will evaluate your requirements and reach out via your preferred method ({preferredContact}) shortly.
+                Thank you for sharing your vision with {studioName}. We have received your project parameters and our team will review your requirements and reach out via {preferredContact} ({email}) promptly.
               </p>
               <div className="pt-4">
                 <button
                   onClick={handleResetForm}
-                  className="px-6 py-2.5 text-xs font-mono text-amber-300 border border-amber-500/50 hover:bg-amber-500 hover:text-stone-950 rounded-sm transition-all uppercase font-bold"
+                  className="px-6 py-2.5 text-xs font-mono text-amber-300 border border-amber-500/50 hover:bg-amber-500 hover:text-stone-950 rounded-sm transition-all uppercase font-bold cursor-pointer"
                 >
                   SUBMIT ANOTHER PROJECT REQUEST
                 </button>
@@ -354,9 +407,25 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ setCursorContext
                 </div>
               </div>
 
+              {/* Error Banner */}
+              {errorMessage && (
+                <div className="flex items-center gap-3 p-3.5 bg-red-950/80 border border-red-500/50 rounded-sm text-red-200 text-xs font-mono">
+                  <AlertCircle className="h-4 w-4 text-red-400 shrink-0" />
+                  <span>{errorMessage}</span>
+                </div>
+              )}
+
+              {/* Success Banner */}
+              {successMessage && (
+                <div className="flex items-center gap-3 p-3.5 bg-emerald-950/80 border border-emerald-500/50 rounded-sm text-emerald-200 text-xs font-mono">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+                  <span>{successMessage}</span>
+                </div>
+              )}
+
               <form onSubmit={handleSubmit} className="space-y-7 text-xs font-mono">
                 
-                {/* 1. Name & 2. Email / Phone */}
+                {/* 1. Name & 2. Email */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-stone-300 mb-2 font-bold uppercase tracking-wide">
@@ -369,20 +438,22 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ setCursorContext
                       onChange={(e) => setName(e.target.value)}
                       placeholder="Your full name or organization"
                       className="w-full bg-stone-950 border border-stone-800 rounded-sm px-4 py-3 text-stone-100 placeholder-stone-600 focus:outline-none focus:border-amber-400 transition-colors"
+                      disabled={isSubmitting}
                     />
                   </div>
 
                   <div>
                     <label className="block text-stone-300 mb-2 font-bold uppercase tracking-wide">
-                      Email / Phone *
+                      Email *
                     </label>
                     <input
-                      type="text"
+                      type="email"
                       required
-                      value={contactInfo}
-                      onChange={(e) => setContactInfo(e.target.value)}
-                      placeholder="e.g. name@domain.com or +251 91 234 5678"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="name@domain.com"
                       className="w-full bg-stone-950 border border-stone-800 rounded-sm px-4 py-3 text-stone-100 placeholder-stone-600 focus:outline-none focus:border-amber-400 transition-colors"
+                      disabled={isSubmitting}
                     />
                   </div>
                 </div>
@@ -399,8 +470,9 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ setCursorContext
                         <button
                           key={type}
                           type="button"
+                          disabled={isSubmitting}
                           onClick={() => setClientType(type)}
-                          className={`flex items-center justify-between px-3.5 py-2.5 rounded-sm border text-left transition-all ${
+                          className={`flex items-center justify-between px-3.5 py-2.5 rounded-sm border text-left transition-all cursor-pointer ${
                             isSelected
                               ? 'bg-amber-400/10 border-amber-400 text-amber-300 font-bold shadow-[0_0_12px_rgba(245,158,11,0.15)]'
                               : 'bg-stone-950 border-stone-800 text-stone-400 hover:text-stone-200 hover:border-stone-700'
@@ -435,8 +507,9 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ setCursorContext
                         <button
                           key={service}
                           type="button"
+                          disabled={isSubmitting}
                           onClick={() => toggleService(service)}
-                          className={`px-3 py-1.5 rounded-xs border text-[11px] font-mono transition-all flex items-center gap-1.5 ${
+                          className={`px-3 py-1.5 rounded-xs border text-[11px] font-mono transition-all flex items-center gap-1.5 cursor-pointer ${
                             isSelected
                               ? 'bg-amber-400/15 border-amber-400 text-amber-300 font-bold'
                               : 'bg-stone-950 border-stone-800 text-stone-400 hover:text-stone-200 hover:border-stone-700'
@@ -450,7 +523,40 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ setCursorContext
                   </div>
                 </div>
 
-                {/* 5. Tell us about your project */}
+                {/* 5. Optional Budget & Timeline */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-stone-300 mb-2 font-bold uppercase tracking-wide flex items-center gap-1.5">
+                      <DollarSign className="h-3.5 w-3.5 text-amber-400" />
+                      <span>Budget Range (Optional)</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={budget}
+                      onChange={(e) => setBudget(e.target.value)}
+                      placeholder="e.g. $25k - $50k or Flexible"
+                      className="w-full bg-stone-950 border border-stone-800 rounded-sm px-4 py-3 text-stone-100 placeholder-stone-600 focus:outline-none focus:border-amber-400 transition-colors"
+                      disabled={isSubmitting}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-stone-300 mb-2 font-bold uppercase tracking-wide flex items-center gap-1.5">
+                      <Clock className="h-3.5 w-3.5 text-amber-400" />
+                      <span>Target Timeline (Optional)</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={timeline}
+                      onChange={(e) => setTimeline(e.target.value)}
+                      placeholder="e.g. Q3 2026 or Next 3 months"
+                      className="w-full bg-stone-950 border border-stone-800 rounded-sm px-4 py-3 text-stone-100 placeholder-stone-600 focus:outline-none focus:border-amber-400 transition-colors"
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                </div>
+
+                {/* 6. Tell us about your project */}
                 <div>
                   <label className="block text-stone-300 mb-1 font-bold uppercase tracking-wide">
                     Tell us about your project *
@@ -463,12 +569,13 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ setCursorContext
                     required
                     value={projectDescription}
                     onChange={(e) => setProjectDescription(e.target.value)}
-                    placeholder="Provide details about your project scope, location/context, aesthetic aspirations, or target schedule..."
+                    placeholder="Provide details about your project scope, aesthetic aspirations, site details, or target goals..."
                     className="w-full bg-stone-950 border border-stone-800 rounded-sm px-4 py-3 text-stone-100 placeholder-stone-600 focus:outline-none focus:border-amber-400 transition-colors leading-relaxed"
+                    disabled={isSubmitting}
                   />
                 </div>
 
-                {/* 6. Upload Files (Optional) */}
+                {/* 7. Upload Files (Optional) */}
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <label className="block text-stone-300 font-bold uppercase tracking-wide">
@@ -483,7 +590,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ setCursorContext
                     onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
                     onDragLeave={() => setIsDragging(false)}
                     onDrop={handleDrop}
-                    onClick={() => fileInputRef.current?.click()}
+                    onClick={() => !isSubmitting && fileInputRef.current?.click()}
                     className={`border border-dashed rounded-sm p-5 text-center cursor-pointer transition-all ${
                       isDragging 
                         ? 'border-amber-400 bg-amber-400/10' 
@@ -496,6 +603,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ setCursorContext
                       multiple
                       onChange={handleFileInputChange}
                       className="hidden"
+                      disabled={isSubmitting}
                     />
                     <div className="flex flex-col items-center justify-center gap-2">
                       <div className="p-2.5 rounded-full bg-stone-900 border border-stone-800 text-amber-400">
@@ -537,8 +645,9 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ setCursorContext
 
                           <button
                             type="button"
+                            disabled={isSubmitting}
                             onClick={(e) => { e.stopPropagation(); removeFile(file.id); }}
-                            className="p-1 text-stone-500 hover:text-red-400 transition-colors"
+                            className="p-1 text-stone-500 hover:text-red-400 transition-colors cursor-pointer"
                             title="Remove file"
                           >
                             <X className="h-3.5 w-3.5" />
@@ -549,7 +658,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ setCursorContext
                   )}
                 </div>
 
-                {/* 7. Preferred Contact Method */}
+                {/* 8. Preferred Contact Method */}
                 <div>
                   <label className="block text-stone-300 mb-2.5 font-bold uppercase tracking-wide">
                     Preferred Contact Method
@@ -561,8 +670,9 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ setCursorContext
                         <button
                           key={method}
                           type="button"
+                          disabled={isSubmitting}
                           onClick={() => setPreferredContact(method)}
-                          className={`flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-sm border text-center transition-all ${
+                          className={`flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-sm border text-center transition-all cursor-pointer ${
                             isSelected
                               ? 'bg-amber-400/10 border-amber-400 text-amber-300 font-bold shadow-[0_0_12px_rgba(245,158,11,0.15)]'
                               : 'bg-stone-950 border-stone-800 text-stone-400 hover:text-stone-200 hover:border-stone-700'
@@ -578,18 +688,18 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ setCursorContext
                   </div>
                 </div>
 
-                {/* 8. Send Project Request Button */}
+                {/* 9. Send Project Request Button */}
                 <div className="pt-4">
-                  <MagneticButton
-                    setCursorContext={setCursorContext}
-                    cursorMode={{ mode: 'link', text: 'TRANSMIT' }}
-                    className="w-full rounded-sm bg-amber-400 py-4 text-xs md:text-sm font-mono font-bold tracking-widest text-stone-950 shadow-[0_0_25px_rgba(245,158,11,0.3)] hover:bg-amber-300 transition-all uppercase disabled:opacity-50"
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    onMouseEnter={() => setCursorContext({ mode: 'link', text: 'TRANSMIT' })}
+                    onMouseLeave={() => setCursorContext({ mode: 'default' })}
+                    className="w-full rounded-sm bg-amber-400 py-4 text-xs md:text-sm font-mono font-bold tracking-widest text-stone-950 shadow-[0_0_25px_rgba(245,158,11,0.3)] hover:bg-amber-300 transition-all uppercase disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
                   >
-                    <span className="flex items-center justify-center gap-2">
-                      {isSubmitting ? 'TRANSMITTING REQUEST...' : 'Send Project Request'}
-                      <Send className="h-4 w-4" />
-                    </span>
-                  </MagneticButton>
+                    <span>{isSubmitting ? 'Sending Request…' : 'Send Project Request'}</span>
+                    <Send className={`h-4 w-4 ${isSubmitting ? 'animate-bounce' : ''}`} />
+                  </button>
                 </div>
               </form>
             </div>

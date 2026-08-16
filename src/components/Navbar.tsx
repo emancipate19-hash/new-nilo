@@ -236,14 +236,14 @@ export const Navbar: React.FC<NavbarProps> = ({
             <span>{reducedMotion ? 'MOTION: REDUCED' : 'MOTION: FULL'}</span>
           </button>
 
-          {/* Magnetic Contact Button */}
+          {/* Contact Button */}
           <MagneticButton
             onClick={onNavigateContact}
             setCursorContext={setCursorContext}
-            cursorMode={{ mode: 'link', text: 'INQUIRE' }}
+            cursorMode={{ mode: 'link', text: 'CONTACT' }}
             className="rounded-sm bg-amber-400 px-5 py-2 text-xs font-mono font-bold text-slate-950 hover:bg-amber-300 transition-colors shadow-[0_0_15px_rgba(245,158,11,0.3)]"
           >
-            COMMISSION →
+            CONTACT →
           </MagneticButton>
         </div>
 
@@ -401,7 +401,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             }}
             className="block w-full text-center bg-amber-400 py-3 text-slate-950 font-bold rounded-sm mt-4 shadow-[0_0_15px_rgba(245,158,11,0.3)]"
           >
-            START A COMMISSION
+            CONTACT ATELIER
           </button>
         </div>
       )}

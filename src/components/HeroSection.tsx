@@ -124,7 +124,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         <div>
           <div className="flex items-baseline gap-3 mb-2">
             <span className="text-xs md:text-sm font-mono tracking-[0.3em] text-amber-400/90 font-bold uppercase">
-              FEATURED ARCHITECTURAL MASTERPIECE
+              ARCHITECTURAL & DESIGN STUDIO
             </span>
           </div>
 
@@ -136,7 +136,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           </h1>
 
           <h2 className="text-2xl sm:text-4xl lg:text-5xl font-mono font-bold tracking-tight text-amber-300 uppercase leading-snug mt-3 drop-shadow-sm">
-            {heroTitle}
+            {heroTitle || 'ROOTED HERE. DESIGNED BEYOND.'}
           </h2>
 
           <p className="mt-6 max-w-2xl text-sm md:text-base font-mono text-slate-200 leading-relaxed bg-slate-950/40 p-3 rounded-sm border-l-2 border-amber-400 backdrop-blur-sm">
@@ -144,7 +144,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           </p>
         </div>
 
-        {/* Magnetic Action Buttons */}
+        {/* Magnetic Action Button */}
         <div className="mt-10 flex flex-wrap items-center gap-5">
           <MagneticButton
             onClick={onExploreProjects}
@@ -156,15 +156,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               EXPLORE WORKS SHOWCASE
               <ArrowDownRight className="h-4 w-4 transition-transform group-hover:translate-x-1 group-hover:translate-y-1" />
             </span>
-          </MagneticButton>
-
-          <MagneticButton
-            onClick={onOpenContact}
-            setCursorContext={setCursorContext}
-            cursorMode={{ mode: 'link', text: 'INQUIRE' }}
-            className="rounded-sm bg-slate-900/90 backdrop-blur-md px-8 py-4 text-xs font-mono font-bold tracking-widest text-slate-200 border border-slate-700 hover:border-amber-400 hover:text-white transition-all"
-          >
-            START A COMMISSION
           </MagneticButton>
         </div>
       </div>

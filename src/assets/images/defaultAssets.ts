@@ -13,7 +13,18 @@ export const GOOGLE_DRIVE_IDS = {
   project9: '1OkQM2tB1qLOiHvoqm68LnBQPMgnzHkR5',
   staffDawit: '1Vp_0adt1fIK1uHNFbaRwojtAG27roSnW',
   staffKidus: '1I_VjQITznicS9dLapt8yS5EaGo4e9qys',
-  staffMilki: '10ErJNl9jtEAnUlL0COEICSvRlZ3IEFAQ'
+  staffMilki: '10ErJNl9jtEAnUlL0COEICSvRlZ3IEFAQ',
+  // Interior Design Specific Drive IDs
+  interior1: '1clNls2iQU3-i0DMAqyn1uFyGyMzjU5Ls',
+  interior2: '1SYBEc7DknemGD5WwMXRhWHnoa2Ph5K3h',
+  interior3: '1Rcu33YkaOoq8RFH9mZHay5kS5uSOaVlM',
+  interior4: '1DF7BwjgPZdvg_C7pd6DwOfe93wrEKgLX',
+  interior5: '1Sh4glAXq_9FBuuI_ilhhkqIilEzE2Lv3',
+  interior6: '1YFBBCv-21U3rzDrwow1DFWClBRG9gmoI',
+  interior7: '1ej3mW3nJixsiVAEPVYEvPWB_q9m5lgjM',
+  interior8: '1rSBM9om0BXG-X-_pj6J7fLhCo3HP6drv',
+  interior9: '1Ycafha6Grb0MqPVpdnOeN4GLGmRgtXbd',
+  interior10: '1NMTHKIfDTNjk14o7s13NwyIprlzPg7RR'
 };
 
 // High-performance direct CDN URLs for Google Drive assets
@@ -30,6 +41,31 @@ export const projectImg6 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_I
 export const projectImg7 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.project7}`;
 export const projectImg8 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.project8}`;
 export const projectImg9 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.project9}`;
+
+// Interior Design Images
+export const interiorImg1 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.interior1}`;
+export const interiorImg2 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.interior2}`;
+export const interiorImg3 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.interior3}`;
+export const interiorImg4 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.interior4}`;
+export const interiorImg5 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.interior5}`;
+export const interiorImg6 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.interior6}`;
+export const interiorImg7 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.interior7}`;
+export const interiorImg8 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.interior8}`;
+export const interiorImg9 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.interior9}`;
+export const interiorImg10 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.interior10}`;
+
+export const INTERIOR_DESIGN_IMAGES = [
+  interiorImg1,
+  interiorImg2,
+  interiorImg3,
+  interiorImg4,
+  interiorImg5,
+  interiorImg6,
+  interiorImg7,
+  interiorImg8,
+  interiorImg9,
+  interiorImg10
+];
 
 export const staffDawitImg = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.staffDawit}`;
 export const staffKidusImg = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.staffKidus}`;
@@ -120,6 +156,16 @@ export const DEFAULT_UPLOADED_ASSETS = {
   project7: projectImg7,
   project8: projectImg8,
   project9: projectImg9,
+  interior1: interiorImg1,
+  interior2: interiorImg2,
+  interior3: interiorImg3,
+  interior4: interiorImg4,
+  interior5: interiorImg5,
+  interior6: interiorImg6,
+  interior7: interiorImg7,
+  interior8: interiorImg8,
+  interior9: interiorImg9,
+  interior10: interiorImg10,
   terrainVilla: projectImg1,
   lumenCenter: projectImg2,
   boleTower: projectImg3,

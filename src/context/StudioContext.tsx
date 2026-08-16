@@ -116,9 +116,9 @@ export const INITIAL_SERVICES: ServiceItem[] = [
 export const INITIAL_CONTACT_DETAILS: ContactDetails = {
   heading: 'Our Message',
   description: 'We believe every project begins with an idea — a vision waiting to take shape.\n\nBy bridging architecture, art, technology, and strategy, we create thoughtful spaces and compelling digital experiences that connect people, purpose, and place. From architectural concepts and spatial design to visual identities, websites, video, and digital storytelling, we approach every project with curiosity, precision, and a strong sense of aesthetics.\n\nOur goal is simple: to transform ideas into meaningful experiences that inspire, engage, and endure.',
-  address: 'AXIS PLAZA, BOLE DISTRICT, ADDIS ABABA, ETHIOPIA',
-  email: 'COMMISSIONS@NILOAXIS.COM',
-  phone: '+251 11 892 4000',
+  address: '',
+  email: 'niloaxisstudio@gmail.com',
+  phone: '',
   workingHours: 'MON - FRI: 08:00 - 19:00 EAT',
   mapLatitude: 8.995,
   mapLongitude: 38.788,
@@ -126,14 +126,14 @@ export const INITIAL_CONTACT_DETAILS: ContactDetails = {
 };
 
 export const INITIAL_HERO_SETTINGS: HeroSettings = {
-  title: 'VERTICAL FOREST TOWER',
-  subtitle: 'LUXURY HABITATION & COASTAL FOREST SANCTUARY',
+  title: 'ROOTED HERE. DESIGNED BEYOND.',
+  subtitle: 'CONTEMPORARY ARCHITECTURE & DESIGN ATELIER',
   tagline: 'CONTEMPORARY ARCHITECTURE & DESIGN ATELIER',
   heroImage: DEFAULT_HERO_IMAGE_URL,
   heroVideoUrl: '',
   ctaPrimaryText: 'EXPLORE WORKS',
   ctaPrimaryLink: '#works-showcase',
-  ctaSecondaryText: 'COMMISSION ATELIER',
+  ctaSecondaryText: 'INQUIRE ATELIER',
   ctaSecondaryLink: '#contact',
   showHero: true
 };
@@ -152,17 +152,8 @@ export const INITIAL_NAV_MENU: NavMenuItem[] = [
 
 export const INITIAL_TEAM_MEMBERS: TeamMember[] = [
   {
-    id: 'team-1',
-    name: 'DAWIT ENDAYLALU',
-    position: 'CREATIVE DIRECTOR & DIGITAL STRATEGIST',
-    portrait: DEFAULT_UPLOADED_ASSETS.staffDawit,
-    bio: 'Bridging art, technology, and strategy to build compelling digital experiences. Specializing in graphic design, video editing, web development, and digital storytelling. With a keen eye for visual aesthetics and a deep understanding of digital ecosystems, every project—from immersive brand identities and dynamic video content to high-performing websites and engaging social media campaigns—is crafted to captivate audiences and drive measurable impact. Seamlessly blending technical execution with visionary creative direction, ideas are brought to life across every digital touchpoint.',
-    socialLinks: { linkedin: 'https://linkedin.com', instagram: 'https://instagram.com' },
-    isVisible: true
-  },
-  {
     id: 'team-2',
-    name: 'KIDUS AMANUEL',
+    name: 'KIDUS AMANUEL HAILESILASSE',
     position: 'PRINCIPAL ARCHITECT & STRUCTURAL ENGINEER',
     portrait: DEFAULT_UPLOADED_ASSETS.staffKidus,
     bio: 'Precision engineering meets timeless architectural design. Extensive expertise and rigorous attention to detail are brought to every stage of the architectural process. Dedicated to translating aspirations into structural masterpieces, technical proficiency is combined with creative ingenuity. Whether designing residential sanctuaries, commercial landmarks, or public spaces, each solution is custom-tailored to deliver structural integrity, spatial efficiency, and exceptional design value.',
@@ -171,11 +162,20 @@ export const INITIAL_TEAM_MEMBERS: TeamMember[] = [
   },
   {
     id: 'team-3',
-    name: 'MILKI TADESSE',
+    name: 'MILKI LEGESSE GONFA',
     position: 'DESIGN DIRECTOR & SUSTAINABLE SPATIAL ARCHITECT',
     portrait: DEFAULT_UPLOADED_ASSETS.staffMilki,
     bio: 'Shaping spaces that inspire, endure, and connect. Driven by a passion for functional artistry, bold visions are transformed into tangible reality. With a strong commitment to sustainable design and modern aesthetics, every project is approached as a unique dialogue between the built environment and the people who inhabit it. From conceptual design to meticulous execution, the focus remains on creating spaces that harmonize beauty, purpose, and environmental responsibility.',
     socialLinks: { instagram: 'https://instagram.com', linkedin: 'https://linkedin.com' },
+    isVisible: true
+  },
+  {
+    id: 'team-1',
+    name: 'DAWIT ENDAYLALU TADESSE',
+    position: 'CREATIVE DIRECTOR & DIGITAL STRATEGIST',
+    portrait: DEFAULT_UPLOADED_ASSETS.staffDawit,
+    bio: 'Bridging art, technology, and strategy to build compelling digital experiences. Specializing in graphic design, video editing, web development, and digital storytelling. With a keen eye for visual aesthetics and a deep understanding of digital ecosystems, every project—from immersive brand identities and dynamic video content to high-performing websites and engaging social media campaigns—is crafted to captivate audiences and drive measurable impact. Seamlessly blending technical execution with visionary creative direction, ideas are brought to life across every digital touchpoint.',
+    socialLinks: { linkedin: 'https://linkedin.com', instagram: 'https://instagram.com' },
     isVisible: true
   }
 ];
@@ -494,7 +494,7 @@ interface StudioContextType extends StudioState {
   applyDriveFilesToStudio: (files: DriveFolderFile[]) => void;
 }
 
-const STORAGE_KEY = 'nilo_axis_studio_state_v20';
+const STORAGE_KEY = 'nilo_axis_studio_state_v26';
 
 const StudioContext = createContext<StudioContextType | undefined>(undefined);
 
@@ -502,8 +502,8 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [logoUrl, setLogoUrl] = useState<string>(DEFAULT_LOGO_URL);
   const [heroImageUrl, setHeroImageUrl] = useState<string>(DEFAULT_HERO_IMAGE_URL);
   const [studioName] = useState<string>('NILO AXIS STUDIO');
-  const [heroTitle, setHeroTitle] = useState<string>('VERTICAL FOREST TOWER');
-  const [heroSubtitle, setHeroSubtitle] = useState<string>('LUXURY HABITATION & COASTAL FOREST SANCTUARY');
+  const [heroTitle, setHeroTitle] = useState<string>('ROOTED HERE. DESIGNED BEYOND.');
+  const [heroSubtitle, setHeroSubtitle] = useState<string>('CONTEMPORARY ARCHITECTURE & DESIGN ATELIER');
   const [heroTagline, setHeroTagline] = useState<string>('CONTEMPORARY ARCHITECTURE & DESIGN ATELIER');
   
   const [heroSettings, setHeroSettings] = useState<HeroSettings>(INITIAL_HERO_SETTINGS);
@@ -514,8 +514,8 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [journalArticles, setJournalArticles] = useState<JournalArticle[]>(INITIAL_JOURNAL_ARTICLES);
   const [contactDetails, setContactDetails] = useState<ContactDetails>(INITIAL_CONTACT_DETAILS);
   const [showcaseHeader, setShowcaseHeader] = useState({
-    title: 'FEATURED ARCHITECTURAL WORKS',
-    subtitle: '01 — PORTFOLIO HIGHLIGHTS & CONCEPTUAL BUILDINGS'
+    title: 'FEATURED ARCHITECTURAL AND DESIGN WORKS',
+    subtitle: '01 — PORTFOLIO HIGHLIGHTS & DESIGN COMMISSIONS'
   });
   const [catalogHeader, setCatalogHeader] = useState({
     title: 'COMPLETE PORTFOLIO INDEX',
@@ -575,8 +575,10 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   useEffect(() => {
     try {
       // Clear older version keys to ensure new default assets take effect immediately
-      ['nilo_axis_studio_state', 'nilo_axis_studio_state_v2', 'nilo_axis_studio_state_v3', 'nilo_axis_studio_state_v4', 'nilo_axis_studio_state_v5', 'nilo_axis_studio_state_v6', 'nilo_axis_studio_state_v7', 'nilo_axis_studio_state_v8', 'nilo_axis_studio_state_v9'].forEach(key => {
-        localStorage.removeItem(key);
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('nilo_axis_studio_state') && key !== STORAGE_KEY) {
+          localStorage.removeItem(key);
+        }
       });
 
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -1303,8 +1305,8 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const resetToDefaults = () => {
     setLogoUrl(DEFAULT_LOGO_URL);
     setHeroImageUrl(DEFAULT_HERO_IMAGE_URL);
-    setHeroTitle('VERTICAL FOREST TOWER');
-    setHeroSubtitle('LUXURY HABITATION & COASTAL FOREST SANCTUARY');
+    setHeroTitle('ROOTED HERE. DESIGNED BEYOND.');
+    setHeroSubtitle('LUXURY HABITATION & CONTEMPORARY SPATIAL SANCTUARY');
     setHeroTagline('CONTEMPORARY ARCHITECTURE & DESIGN ATELIER');
     setHeroSettings(INITIAL_HERO_SETTINGS);
     setNavMenuItems(INITIAL_NAV_MENU);
@@ -1314,8 +1316,8 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setJournalArticles(INITIAL_JOURNAL_ARTICLES);
     setContactDetails(INITIAL_CONTACT_DETAILS);
     setShowcaseHeader({
-      title: 'FEATURED ARCHITECTURAL WORKS',
-      subtitle: '01 — PORTFOLIO HIGHLIGHTS & CONCEPTUAL BUILDINGS'
+      title: 'FEATURED ARCHITECTURAL AND DESIGN WORKS',
+      subtitle: '01 — DISCIPLINARY PORTFOLIO & SPATIAL CREATIVE COMMISSIONS'
     });
     setCatalogHeader({
       title: 'COMPLETE PORTFOLIO INDEX',
