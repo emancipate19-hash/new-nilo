@@ -16,6 +16,7 @@ import {
   DollarSign
 } from 'lucide-react';
 import { useStudio } from '../context/StudioContext';
+import { supabase } from '../lib/supabase';
 
 interface ContactSectionProps {
   setCursorContext: (context: CursorContextState) => void;
@@ -170,30 +171,40 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ setCursorContext
     try {
       const projectTypeStr = selectedServices.join(', ');
       
-      const payload = {
+      const formData = {
         name: trimmedName,
         email: trimmedEmail,
         projectType: projectTypeStr,
-        budget: budget.trim(),
-        timeline: timeline.trim(),
+        services: selectedServices,
+        budget: budget.trim() || undefined,
+        timeline: timeline.trim() || undefined,
         clientType: clientType,
         preferredContact: preferredContact,
-        message: trimmedMessage + (uploadedFiles.length > 0 ? `\n[Attachments: ${uploadedFiles.map(f => f.name).join(', ')}]` : '')
+        message: trimmedMessage,
+        attachments: uploadedFiles.map(f => f.name)
       };
 
-      // 3. Send form data to backend API
-      const res = await fetch('/api/project-request', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
+      // 3. Call existing Supabase Edge Function: send-project-request
+      const { data, error } = await supabase.functions.invoke('send-project-request', {
+        body: formData
       });
 
-      const data = await res.json().catch(() => ({}));
+      if (error) {
+        let errorText = error.message || 'Something went wrong. Please try again.';
+        if (error && 'context' in error && (error as any).context) {
+          try {
+            const body = await (error as any).context.json();
+            if (body?.error) errorText = body.error;
+            else if (body?.message) errorText = body.message;
+          } catch {
+            // ignore
+          }
+        }
+        throw new Error(errorText);
+      }
 
-      if (!res.ok || data.success === false) {
-        throw new Error(data.error || 'Something went wrong. Please try again.');
+      if (data && data.success === false) {
+        throw new Error(data.error || 'Failed to submit project request.');
       }
 
       // Save to local context inquiries
@@ -204,7 +215,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ setCursorContext
         projectType: projectTypeStr,
         budget: budget || clientType,
         location: `Contact via ${preferredContact}`,
-        message: payload.message,
+        message: trimmedMessage + (uploadedFiles.length > 0 ? `\n[Attachments: ${uploadedFiles.map(f => f.name).join(', ')}]` : ''),
         answers: {
           clientType,
           services: projectTypeStr,
@@ -215,13 +226,15 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ setCursorContext
         }
       });
 
-      // 5. After successful Telegram delivery, show: "Project request sent successfully."
+      // 4. Show professional success message
       setSuccessMessage('Project request sent successfully.');
       setFormSubmitted(true);
     } catch (err: any) {
       console.error('Submission error:', err);
-      // 6. If it fails, show: "Something went wrong. Please try again."
-      setErrorMessage('Something went wrong. Please try again.');
+      const errMsg = err?.message && err.message !== 'Failed to fetch' 
+        ? err.message 
+        : 'Something went wrong while sending your request. Please try again.';
+      setErrorMessage(errMsg);
     } finally {
       setIsSubmitting(false);
     }
