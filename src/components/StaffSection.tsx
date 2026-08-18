@@ -130,8 +130,10 @@ export const StaffSection: React.FC<StaffSectionProps> = ({ setCursorContext }) 
 
     try {
       setIsUploadingPhoto(true);
-      const dataUrl = await uploadFileAsDataUrl(file);
-      setFormState((prev) => ({ ...prev, portrait: dataUrl }));
+      const url = await uploadFileAsDataUrl(file, 'team');
+      if (url) {
+        setFormState((prev) => ({ ...prev, portrait: url }));
+      }
     } catch (err) {
       console.error('Error uploading portrait:', err);
     } finally {
@@ -144,11 +146,13 @@ export const StaffSection: React.FC<StaffSectionProps> = ({ setCursorContext }) 
     if (!file) return;
 
     try {
-      const dataUrl = await uploadFileAsDataUrl(file);
-      updateTeamMember({
-        ...member,
-        portrait: dataUrl
-      });
+      const url = await uploadFileAsDataUrl(file, 'team');
+      if (url) {
+        updateTeamMember({
+          ...member,
+          portrait: url
+        });
+      }
     } catch (err) {
       console.error('Error uploading inline portrait:', err);
     }

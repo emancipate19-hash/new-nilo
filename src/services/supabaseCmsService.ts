@@ -437,61 +437,65 @@ export async function fetchCmsDataFromSupabase() {
 
 /**
  * Upload an image file directly to Supabase Storage bucket 'website-assets'
+ * and return its permanent public URL.
  */
 export async function uploadImageToSupabaseStorage(
   file: File,
   folder: 'projects' | 'services' | 'team' | 'gallery' | 'brand' | 'uploads' = 'uploads'
 ): Promise<{ url: string; path: string; error: string | null }> {
-  // If Supabase not configured, convert to Data URL fallback
   if (!isSupabaseConfigured) {
-    const dataUrl = await fileToDataUrl(file);
-    return { url: dataUrl, path: '', error: null };
+    const errorMsg = 'Supabase credentials are not configured (VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are required).';
+    console.error('[Supabase Storage]', errorMsg);
+    return { url: '', path: '', error: errorMsg };
   }
 
   try {
-    const fileExt = file.name.split('.').pop() || 'jpg';
-    const cleanFileName = file.name
+    const rawExt = file.name.split('.').pop() || 'jpg';
+    const extension = rawExt.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const rawName = file.name.includes('.') 
+      ? file.name.substring(0, file.name.lastIndexOf('.'))
+      : file.name;
+    const baseName = rawName
       .toLowerCase()
       .replace(/[^a-z0-9]/g, '-')
-      .replace(/-+/g, '-');
-    const filePath = `${folder}/${Date.now()}_${cleanFileName}.${fileExt}`;
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '') || 'asset';
+
+    const timestamp = Date.now();
+    const filePath = `${folder}/${timestamp}_${baseName}.${extension}`;
+
+    const contentType = file.type || `image/${extension === 'jpg' ? 'jpeg' : extension}`;
 
     const { error: uploadError } = await supabase.storage
       .from(SUPABASE_STORAGE_BUCKET)
       .upload(filePath, file, {
+        contentType,
         cacheControl: '3600',
         upsert: true
       });
 
     if (uploadError) {
-      console.warn('[Supabase Storage] Direct upload error, using Data URL fallback:', uploadError.message);
-      const dataUrl = await fileToDataUrl(file);
-      return { url: dataUrl, path: '', error: uploadError.message };
+      console.error('[Supabase Storage] Upload error:', uploadError.message);
+      return { url: '', path: '', error: uploadError.message };
     }
 
     const { data: publicUrlData } = supabase.storage
       .from(SUPABASE_STORAGE_BUCKET)
       .getPublicUrl(filePath);
 
+    const publicUrl = publicUrlData?.publicUrl || `${supabaseUrl}/storage/v1/object/public/${SUPABASE_STORAGE_BUCKET}/${filePath}`;
+
+    console.info('[Supabase Storage] Successfully uploaded asset to:', publicUrl);
+
     return {
-      url: publicUrlData.publicUrl,
+      url: publicUrl,
       path: filePath,
       error: null
     };
   } catch (err: any) {
-    console.warn('[Supabase Storage] Unexpected upload error, fallback to Data URL:', err);
-    const dataUrl = await fileToDataUrl(file);
-    return { url: dataUrl, path: '', error: err.message };
+    console.error('[Supabase Storage] Unexpected error during file upload:', err);
+    return { url: '', path: '', error: err.message || 'Unexpected upload error' };
   }
-}
-
-function fileToDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
 }
 
 /**
@@ -717,6 +721,40 @@ export async function deleteGalleryItemFromSupabase(itemId: string): Promise<boo
   if (!isSupabaseConfigured) return false;
   try {
     const { error } = await supabase.from('gallery').delete().eq('id', itemId);
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Upsert Before/After Pair to Supabase
+ */
+export async function upsertBeforeAfterToSupabase(pair: BeforeAfterPair): Promise<boolean> {
+  if (!isSupabaseConfigured) return false;
+  try {
+    const { error } = await supabase.from('before_after').upsert({
+      id: pair.id,
+      title: pair.title,
+      before_image: pair.beforeImage,
+      after_image: pair.afterImage,
+      description: pair.description || '',
+      is_visible: pair.isVisible ?? true,
+      updated_at: new Date().toISOString()
+    });
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Delete Before/After Pair from Supabase
+ */
+export async function deleteBeforeAfterFromSupabase(pairId: string): Promise<boolean> {
+  if (!isSupabaseConfigured) return false;
+  try {
+    const { error } = await supabase.from('before_after').delete().eq('id', pairId);
     return !error;
   } catch {
     return false;

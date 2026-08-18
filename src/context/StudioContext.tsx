@@ -63,6 +63,8 @@ import {
   deleteJournalArticleFromSupabase,
   upsertGalleryItemToSupabase,
   deleteGalleryItemFromSupabase,
+  upsertBeforeAfterToSupabase,
+  deleteBeforeAfterFromSupabase,
   saveSiteContentToSupabase,
   seedAllDataToSupabase
 } from '../services/supabaseCmsService';
@@ -528,7 +530,7 @@ interface StudioContextType extends StudioState {
   exportBackupJSON: () => string;
   importBackupJSON: (jsonStr: string) => boolean;
   resetToDefaults: () => void;
-  uploadFileAsDataUrl: (file: File) => Promise<string>;
+  uploadFileAsDataUrl: (file: File, folder?: 'projects' | 'services' | 'team' | 'gallery' | 'brand' | 'uploads') => Promise<string>;
   uploadImageToStorage: (file: File, folder?: 'projects' | 'services' | 'team' | 'gallery' | 'brand' | 'uploads') => Promise<{ url: string; path: string; error: string | null }>;
   syncWithSupabase: () => Promise<void>;
   pushAllToSupabase: () => Promise<{ success: boolean; errors: string[] }>;
@@ -965,25 +967,7 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     file: File,
     folder: 'projects' | 'services' | 'team' | 'gallery' | 'brand' | 'uploads' = 'uploads'
   ): Promise<{ url: string; path: string; error: string | null }> => {
-    try {
-      const storageResult = await uploadImageToSupabaseStorage(file, folder);
-      if (storageResult.url && !storageResult.error) {
-        return storageResult;
-      }
-      const dataUrl = await uploadFileAsDataUrl(file);
-      return {
-        url: dataUrl,
-        path: `local/${file.name}`,
-        error: storageResult.error
-      };
-    } catch {
-      const dataUrl = await uploadFileAsDataUrl(file);
-      return {
-        url: dataUrl,
-        path: `local/${file.name}`,
-        error: null
-      };
-    }
+    return await uploadImageToSupabaseStorage(file, folder);
   };
 
   // Admin Auth Helpers - Strict Supabase Authentication Only
@@ -1057,19 +1041,19 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }
   };
 
-  const uploadFileAsDataUrl = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        if (e.target?.result) {
-          resolve(e.target.result as string);
-        } else {
-          reject(new Error('Failed to read image file'));
-        }
-      };
-      reader.onerror = (err) => reject(err);
-      reader.readAsDataURL(file);
-    });
+  const uploadFileAsDataUrl = async (
+    file: File,
+    folder: 'projects' | 'services' | 'team' | 'gallery' | 'brand' | 'uploads' = 'uploads'
+  ): Promise<string> => {
+    const result = await uploadImageToSupabaseStorage(file, folder);
+    if (result.url && !result.error) {
+      return result.url;
+    }
+    if (result.error) {
+      console.error('[Upload Failed]:', result.error);
+      throw new Error(`Supabase Storage upload failed: ${result.error}`);
+    }
+    return result.url;
   };
 
   const updateLogo = (newUrl: string) => {
@@ -1415,16 +1399,19 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const updated = [...beforeAfterList, pair];
     setBeforeAfterList(updated);
     saveState({ beforeAfterList: updated });
+    upsertBeforeAfterToSupabase(pair).catch(() => {});
   };
   const updateBeforeAfterPair = (pair: BeforeAfterPair) => {
     const updated = beforeAfterList.map((p) => (p.id === pair.id ? pair : p));
     setBeforeAfterList(updated);
     saveState({ beforeAfterList: updated });
+    upsertBeforeAfterToSupabase(pair).catch(() => {});
   };
   const deleteBeforeAfterPair = (id: string) => {
     const updated = beforeAfterList.filter((p) => p.id !== id);
     setBeforeAfterList(updated);
     saveState({ beforeAfterList: updated });
+    deleteBeforeAfterFromSupabase(id).catch(() => {});
   };
 
   const addPanorama360Item = (item: Panorama360Item) => {

@@ -527,7 +527,7 @@ const HeroTab: React.FC<{
   updateHeroSettings: (s: any) => void;
   logoUrl: string;
   updateLogo: (url: string) => void;
-  uploadFileAsDataUrl: (f: File) => Promise<string>;
+  uploadFileAsDataUrl: (f: File, folder?: 'projects' | 'services' | 'team' | 'gallery' | 'brand' | 'uploads') => Promise<string>;
   showToast: (m: string) => void;
 }> = ({ heroSettings, updateHeroSettings, logoUrl, updateLogo, uploadFileAsDataUrl, showToast }) => {
   const [form, setForm] = useState(heroSettings);
@@ -540,18 +540,30 @@ const HeroTab: React.FC<{
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const url = await uploadFileAsDataUrl(file);
-      updateLogo(url);
-      showToast('Studio Logo updated');
+      try {
+        const url = await uploadFileAsDataUrl(file, 'brand');
+        if (url) {
+          updateLogo(url);
+          showToast('Studio Logo uploaded to Supabase Storage');
+        }
+      } catch (err: any) {
+        showToast(`Upload failed: ${err.message || err}`);
+      }
     }
   };
 
   const handleHeroImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const url = await uploadFileAsDataUrl(file);
-      setForm((prev: any) => ({ ...prev, heroImage: url }));
-      showToast('Hero background image updated');
+      try {
+        const url = await uploadFileAsDataUrl(file, 'brand');
+        if (url) {
+          setForm((prev: any) => ({ ...prev, heroImage: url }));
+          showToast('Hero background uploaded to Supabase Storage');
+        }
+      } catch (err: any) {
+        showToast(`Upload failed: ${err.message || err}`);
+      }
     }
   };
 
@@ -815,7 +827,7 @@ const ProjectsTab: React.FC<{
   addProject: (p: Project) => void;
   updateProject: (p: Project) => void;
   deleteProject: (id: string) => void;
-  uploadFileAsDataUrl: (f: File) => Promise<string>;
+  uploadFileAsDataUrl: (f: File, folder?: 'projects' | 'services' | 'team' | 'gallery' | 'brand' | 'uploads') => Promise<string>;
   showToast: (m: string) => void;
 }> = ({ projects, addProject, updateProject, deleteProject, uploadFileAsDataUrl, showToast }) => {
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -895,9 +907,15 @@ const ProjectsTab: React.FC<{
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: 'heroImage' | 'previewImage') => {
     const file = e.target.files?.[0];
     if (file) {
-      const url = await uploadFileAsDataUrl(file);
-      setForm((prev) => ({ ...prev, [field]: url }));
-      showToast('Image uploaded');
+      try {
+        const url = await uploadFileAsDataUrl(file, 'projects');
+        if (url) {
+          setForm((prev) => ({ ...prev, [field]: url }));
+          showToast('Project image uploaded to Supabase Storage');
+        }
+      } catch (err: any) {
+        showToast(`Upload failed: ${err.message || err}`);
+      }
     }
   };
 
@@ -1372,7 +1390,7 @@ const TeamTab: React.FC<{
   addFaqItem: (f: FaqItem) => void;
   updateFaqItem: (f: FaqItem) => void;
   deleteFaqItem: (id: string) => void;
-  uploadFileAsDataUrl: (f: File) => Promise<string>;
+  uploadFileAsDataUrl: (f: File, folder?: 'projects' | 'services' | 'team' | 'gallery' | 'brand' | 'uploads') => Promise<string>;
   showToast: (m: string) => void;
 }> = ({ 
   teamMembers, 
@@ -1416,12 +1434,14 @@ const TeamTab: React.FC<{
     const file = e.target.files?.[0];
     if (!file) return;
     try {
-      const dataUrl = await uploadFileAsDataUrl(file);
-      updateTeamMember({ ...member, portrait: dataUrl });
-      showToast('Portrait photo updated');
-    } catch (err) {
+      const url = await uploadFileAsDataUrl(file, 'team');
+      if (url) {
+        updateTeamMember({ ...member, portrait: url });
+        showToast('Portrait photo uploaded to Supabase Storage');
+      }
+    } catch (err: any) {
       console.error(err);
-      showToast('Failed to upload image');
+      showToast(`Upload failed: ${err.message || err}`);
     }
   };
 

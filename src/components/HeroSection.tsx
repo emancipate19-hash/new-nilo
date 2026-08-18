@@ -58,8 +58,10 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
     if (!file) return;
     try {
       setIsUploading(true);
-      const dataUrl = await uploadFileAsDataUrl(file);
-      updateHeroImage(dataUrl);
+      const publicUrl = await uploadFileAsDataUrl(file, 'brand');
+      if (publicUrl) {
+        updateHeroImage(publicUrl);
+      }
     } catch (err) {
       console.error('Failed to change hero image', err);
     } finally {

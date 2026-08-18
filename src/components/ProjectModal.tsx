@@ -39,8 +39,10 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
     if (!file) return;
     try {
       setUploading(true);
-      const dataUrl = await uploadFileAsDataUrl(file);
-      setHeroImage(dataUrl);
+      const publicUrl = await uploadFileAsDataUrl(file, 'projects');
+      if (publicUrl) {
+        setHeroImage(publicUrl);
+      }
     } catch (err) {
       console.error('Failed to upload image', err);
     } finally {

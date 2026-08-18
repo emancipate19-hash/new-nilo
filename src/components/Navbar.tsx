@@ -60,8 +60,10 @@ export const Navbar: React.FC<NavbarProps> = ({
     if (!file) return;
     try {
       setLogoUploading(true);
-      const dataUrl = await uploadFileAsDataUrl(file);
-      updateLogo(dataUrl);
+      const publicUrl = await uploadFileAsDataUrl(file, 'brand');
+      if (publicUrl) {
+        updateLogo(publicUrl);
+      }
     } catch (err) {
       console.error('Failed to upload logo', err);
     } finally {

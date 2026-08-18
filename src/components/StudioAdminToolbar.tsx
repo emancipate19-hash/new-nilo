@@ -53,8 +53,10 @@ export const StudioAdminToolbar: React.FC<StudioAdminToolbarProps> = ({ onOpenAd
     const file = e.target.files?.[0];
     if (!file) return;
     try {
-      const dataUrl = await uploadFileAsDataUrl(file);
-      updateLogo(dataUrl);
+      const publicUrl = await uploadFileAsDataUrl(file, 'brand');
+      if (publicUrl) {
+        updateLogo(publicUrl);
+      }
     } catch (err) {
       console.error(err);
     }
@@ -64,8 +66,10 @@ export const StudioAdminToolbar: React.FC<StudioAdminToolbarProps> = ({ onOpenAd
     const file = e.target.files?.[0];
     if (!file) return;
     try {
-      const dataUrl = await uploadFileAsDataUrl(file);
-      updateHeroImage(dataUrl);
+      const publicUrl = await uploadFileAsDataUrl(file, 'brand');
+      if (publicUrl) {
+        updateHeroImage(publicUrl);
+      }
     } catch (err) {
       console.error(err);
     }
