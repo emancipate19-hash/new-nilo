@@ -90,7 +90,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         }}
       >
         <img
-          src={heroImageUrl}
+  src="https://eyzsdftddznlmonfpnko.supabase.co/storage/v1/object/public/website-assets/hero.jpg"
           alt={`${studioName} Hero Architectural Vision`}
           referrerPolicy="no-referrer"
           className="h-full w-full object-cover filter brightness-[0.95] contrast-[1.08]"
