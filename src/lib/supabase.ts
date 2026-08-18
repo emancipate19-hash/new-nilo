@@ -1,22 +1,32 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-// Retrieve Supabase environment variables
-const supabaseUrl: string = 
+// Deployed project URL
+export const DEFAULT_SUPABASE_URL = 'https://eyzsdftddznlmonfpnko.supabase.co';
+
+// Retrieve Supabase environment variables with explicit fallback to deployed project
+export const supabaseUrl: string = 
   (import.meta.env.VITE_SUPABASE_URL as string) || 
   (import.meta.env.VITE_PUBLIC_SUPABASE_URL as string) || 
-  '';
+  DEFAULT_SUPABASE_URL;
 
-const supabaseAnonKey: string = 
+export const supabaseAnonKey: string = 
   (import.meta.env.VITE_SUPABASE_ANON_KEY as string) || 
   (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string) || 
   (import.meta.env.VITE_SUPABASE_KEY as string) || 
   '';
 
-// Create a singleton Supabase client instance
-// If credentials are not configured yet, use safe fallback to avoid throwing at startup
+
+// Create a singleton Supabase client instance pointing directly to your Supabase project
 export const supabase: SupabaseClient = createClient(
-  supabaseUrl || 'https://placeholder.supabase.co',
-  supabaseAnonKey || 'placeholder-anon-key'
+  supabaseUrl,
+  supabaseAnonKey || 'anon-key-placeholder',
+  {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false
+    }
+  }
 );
 
-export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
+export const isSupabaseConfigured = Boolean(supabaseAnonKey && supabaseAnonKey !== 'anon-key-placeholder');
+

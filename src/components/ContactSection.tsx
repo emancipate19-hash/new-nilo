@@ -13,10 +13,13 @@ import {
   X, 
   AlertCircle,
   Clock,
-  DollarSign
+  DollarSign,
+  Terminal,
+  Activity
 } from 'lucide-react';
 import { useStudio } from '../context/StudioContext';
-import { supabase } from '../lib/supabase';
+import { supabase, supabaseUrl, isSupabaseConfigured, DEFAULT_SUPABASE_URL } from '../lib/supabase';
+
 
 interface ContactSectionProps {
   setCursorContext: (context: CursorContextState) => void;
@@ -82,6 +85,16 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ setCursorContext
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // Temporary Telegram Test State & Diagnostics
+  const [isTestingTelegram, setIsTestingTelegram] = useState(false);
+  const [testTelegramResult, setTestTelegramResult] = useState<{
+    success: boolean;
+    message: string;
+    fullError?: string;
+    responseData?: any;
+  } | null>(null);
+
 
   const toggleService = (service: string) => {
     setSelectedServices(prev => 
@@ -185,26 +198,68 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ setCursorContext
       };
 
       // 3. Call existing Supabase Edge Function: send-project-request
+      console.log('[Supabase] Invoking Edge Function "send-project-request" with payload:', formData);
       const { data, error } = await supabase.functions.invoke('send-project-request', {
         body: formData
       });
 
       if (error) {
+        console.error('[Supabase Functions Error]', {
+          error,
+          message: error.message,
+          name: error.name,
+          context: (error as any).context
+        });
         let errorText = error.message || 'Something went wrong. Please try again.';
+        
+        // Extract server response if available in error context
         if (error && 'context' in error && (error as any).context) {
           try {
-            const body = await (error as any).context.json();
-            if (body?.error) errorText = body.error;
-            else if (body?.message) errorText = body.message;
-          } catch {
-            // ignore
+            const contextRes = (error as any).context;
+            if (typeof contextRes.json === 'function') {
+              const body = await contextRes.json();
+              console.error('[Supabase Functions Error Body]', body);
+              if (body?.error) {
+                if (typeof body.error === 'string') {
+                  errorText = body.error;
+                } else if (typeof body.error === 'object' && body.error !== null) {
+                  errorText = body.error.message || body.error.description || JSON.stringify(body.error);
+                }
+              } else if (body?.message) {
+                errorText = typeof body.message === 'string' ? body.message : JSON.stringify(body.message);
+              }
+            } else if (typeof contextRes.text === 'function') {
+              const rawText = await contextRes.text();
+              console.error('[Supabase Functions Error Text]', rawText);
+              if (rawText) errorText = rawText;
+            }
+          } catch (parseErr) {
+            console.error('[Supabase Context Parse Error]', parseErr);
           }
         }
+
+        // Provide actionable guidance for Telegram common errors
+        if (errorText.includes('chat not found')) {
+          errorText = 'Telegram error: "Chat not found". Please send /start to your bot in Telegram first, or add the bot to your group/channel with admin rights, and check TELEGRAM_CHAT_ID in Supabase Secrets.';
+        } else if (errorText.includes('Unauthorized') || errorText.includes('invalid token')) {
+          errorText = 'Telegram error: "Unauthorized / Invalid Bot Token". Please check TELEGRAM_BOT_TOKEN in Supabase Secrets.';
+        }
+
         throw new Error(errorText);
       }
 
+      console.log('[Supabase] Edge Function response:', data);
+
       if (data && data.success === false) {
-        throw new Error(data.error || 'Failed to submit project request.');
+        let errDetail = 'Failed to submit project request.';
+        if (data.error) {
+          if (typeof data.error === 'string') errDetail = data.error;
+          else if (typeof data.error === 'object') errDetail = data.error.message || data.error.description || JSON.stringify(data.error);
+        }
+        if (errDetail.includes('chat not found')) {
+          errDetail = 'Telegram error: "Chat not found". Please send /start to your bot in Telegram first, or add the bot to your group/channel with admin rights.';
+        }
+        throw new Error(errDetail);
       }
 
       // Save to local context inquiries
@@ -237,6 +292,99 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ setCursorContext
       setErrorMessage(errMsg);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleTestTelegramConnection = async () => {
+    setIsTestingTelegram(true);
+    setTestTelegramResult(null);
+
+    const testPayload = {
+      name: "Test User",
+      email: "test@example.com",
+      projectType: "Test",
+      message: "This is a connection test."
+    };
+
+    console.log('[Supabase Test] Directly invoking Edge Function "send-project-request" with:', testPayload);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("send-project-request", {
+        body: testPayload
+      });
+
+      if (error) {
+        console.error('[Supabase Test Error]', error);
+        let errorBodyText = '';
+        let parsedErrorObj: any = null;
+        if (error && 'context' in error && (error as any).context) {
+          try {
+            const res = (error as any).context;
+            if (typeof res.json === 'function') {
+              parsedErrorObj = await res.json();
+              errorBodyText = JSON.stringify(parsedErrorObj, null, 2);
+            } else if (typeof res.text === 'function') {
+              errorBodyText = await res.text();
+            }
+          } catch (e: any) {
+            errorBodyText = `(Could not parse response body: ${e?.message})`;
+          }
+        }
+
+        let specificMessage = error.message || 'Invocation failed';
+        if (parsedErrorObj) {
+          const detail = parsedErrorObj.error?.message || parsedErrorObj.error?.description || (typeof parsedErrorObj.error === 'string' ? parsedErrorObj.error : null);
+          if (detail) {
+            specificMessage = detail;
+          }
+        }
+
+        const fullDiagnostic = [
+          `Error Name: ${error.name || 'FunctionsError'}`,
+          `Message: ${specificMessage}`,
+          errorBodyText ? `Response Data:\n${errorBodyText}` : 'Response Data: Empty (Network, CORS, or Preflight error)',
+          `Target Supabase URL: ${supabaseUrl || DEFAULT_SUPABASE_URL}`,
+          `Target Endpoint: ${supabaseUrl || DEFAULT_SUPABASE_URL}/functions/v1/send-project-request`,
+          specificMessage.includes('chat not found') 
+            ? '💡 Action required: Telegram returned "chat not found". Open your bot in Telegram and click /start, or add the bot as an administrator to your group/channel, and confirm TELEGRAM_CHAT_ID in Supabase Secrets.' 
+            : null,
+          !isSupabaseConfigured ? '⚠️ Note: VITE_SUPABASE_ANON_KEY is not defined in environment variables.' : 'Anon key configured.'
+        ].filter(Boolean).join('\n\n');
+
+        setTestTelegramResult({
+          success: false,
+          message: specificMessage,
+          fullError: fullDiagnostic
+        });
+        return;
+      }
+
+      console.log('[Supabase Test Success Response]', data);
+
+      if (data && data.success === false) {
+        setTestTelegramResult({
+          success: false,
+          message: data.error || 'Edge function returned success: false',
+          responseData: data,
+          fullError: JSON.stringify(data, null, 2)
+        });
+        return;
+      }
+
+      setTestTelegramResult({
+        success: true,
+        message: 'Telegram test notification transmitted successfully!',
+        responseData: data
+      });
+    } catch (err: any) {
+      console.error('[Supabase Test Exception]', err);
+      setTestTelegramResult({
+        success: false,
+        message: err?.message || 'Exception during function invocation',
+        fullError: `Exception: ${err?.name || 'Error'}: ${err?.message}\n${err?.stack || ''}`
+      });
+    } finally {
+      setIsTestingTelegram(false);
     }
   };
 
@@ -701,11 +849,11 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ setCursorContext
                   </div>
                 </div>
 
-                {/* 9. Send Project Request Button */}
-                <div className="pt-4">
+                {/* 9. Send Project Request Button & Test Telegram Connection */}
+                <div className="pt-4 space-y-3">
                   <button
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || isTestingTelegram}
                     onMouseEnter={() => setCursorContext({ mode: 'link', text: 'TRANSMIT' })}
                     onMouseLeave={() => setCursorContext({ mode: 'default' })}
                     className="w-full rounded-sm bg-amber-400 py-4 text-xs md:text-sm font-mono font-bold tracking-widest text-stone-950 shadow-[0_0_25px_rgba(245,158,11,0.3)] hover:bg-amber-300 transition-all uppercase disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
@@ -713,6 +861,78 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ setCursorContext
                     <span>{isSubmitting ? 'Sending Request…' : 'Send Project Request'}</span>
                     <Send className={`h-4 w-4 ${isSubmitting ? 'animate-bounce' : ''}`} />
                   </button>
+
+                  {/* Temporary Action: Test Telegram Connection */}
+                  <div className="flex flex-col gap-2 pt-1 border-t border-stone-800/80">
+                    <button
+                      type="button"
+                      disabled={isSubmitting || isTestingTelegram}
+                      onClick={handleTestTelegramConnection}
+                      className="w-full py-2.5 px-4 rounded-sm border border-dashed border-stone-700 hover:border-amber-400/80 bg-stone-950/60 hover:bg-stone-900/80 text-[11px] font-mono text-stone-300 hover:text-amber-300 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Terminal className="h-3.5 w-3.5 text-amber-400" />
+                      <span>{isTestingTelegram ? 'Testing Telegram Connection via Supabase…' : 'Test Telegram Connection (Direct Edge Function Invoke)'}</span>
+                      {isTestingTelegram && <Activity className="h-3.5 w-3.5 animate-spin text-amber-400" />}
+                    </button>
+
+                    {/* Live Test Diagnostic Output */}
+                    {testTelegramResult && (
+                      <div className={`p-3.5 rounded-sm text-xs font-mono border transition-all ${
+                        testTelegramResult.success
+                          ? 'bg-emerald-950/30 border-emerald-500/40 text-emerald-300'
+                          : 'bg-red-950/40 border-red-500/50 text-red-300'
+                      }`}>
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <div className="flex items-center gap-2 font-bold tracking-wider uppercase text-[11px]">
+                            {testTelegramResult.success ? (
+                              <>
+                                <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+                                <span>Connection Test Passed</span>
+                              </>
+                            ) : (
+                              <>
+                                <AlertCircle className="h-4 w-4 text-red-400 shrink-0" />
+                                <span>Edge Function Invocation Diagnostic</span>
+                              </>
+                            )}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setTestTelegramResult(null)}
+                            className="text-stone-400 hover:text-stone-200 p-0.5"
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+
+                        <p className="text-xs leading-relaxed mb-2 font-medium">
+                          {testTelegramResult.message}
+                        </p>
+
+                        {testTelegramResult.fullError && (
+                          <div className="mt-2.5 pt-2 border-t border-stone-800/80">
+                            <span className="text-[10px] uppercase font-bold text-stone-400 block mb-1">
+                              Diagnostic Details & Error Output:
+                            </span>
+                            <pre className="text-[11px] leading-snug p-2.5 bg-black/60 border border-stone-800 rounded text-stone-300 overflow-x-auto whitespace-pre-wrap font-mono select-text">
+                              {testTelegramResult.fullError}
+                            </pre>
+                          </div>
+                        )}
+
+                        {testTelegramResult.responseData && (
+                          <div className="mt-2.5 pt-2 border-t border-stone-800/80">
+                            <span className="text-[10px] uppercase font-bold text-emerald-400 block mb-1">
+                              Function Response:
+                            </span>
+                            <pre className="text-[11px] leading-snug p-2 bg-black/60 border border-emerald-900/50 rounded text-emerald-200 overflow-x-auto whitespace-pre-wrap font-mono">
+                              {JSON.stringify(testTelegramResult.responseData, null, 2)}
+                            </pre>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </form>
             </div>
