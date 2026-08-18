@@ -24,9 +24,14 @@ import {
   SeoSettings,
   SocialLink,
   FooterSettings,
-  LegalContent
+  LegalContent,
+  CategoryItem,
+  GalleryItem,
+  SupabaseSyncStatus,
+  AdminUser
 } from '../types';
 import { PROJECTS as INITIAL_PROJECTS, JOURNAL_ARTICLES as INITIAL_JOURNAL_ARTICLES } from '../data/projects';
+import { INITIAL_CATEGORIES, INITIAL_GALLERY_ITEMS } from '../data/categories';
 import {
   DEFAULT_LOGO_URL,
   DEFAULT_HERO_IMAGE_URL,
@@ -42,6 +47,26 @@ import {
   getDriveImageUrl,
   getDriveThumbnailUrl
 } from '../services/googleDriveService';
+import {
+  checkSupabaseConnection,
+  fetchCmsDataFromSupabase,
+  uploadImageToSupabaseStorage,
+  upsertProjectToSupabase,
+  deleteProjectFromSupabase,
+  upsertCategoryToSupabase,
+  deleteCategoryFromSupabase,
+  upsertServiceToSupabase,
+  deleteServiceFromSupabase,
+  upsertTeamMemberToSupabase,
+  deleteTeamMemberFromSupabase,
+  upsertJournalArticleToSupabase,
+  deleteJournalArticleFromSupabase,
+  upsertGalleryItemToSupabase,
+  deleteGalleryItemFromSupabase,
+  saveSiteContentToSupabase,
+  seedAllDataToSupabase
+} from '../services/supabaseCmsService';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 export const INITIAL_PHILOSOPHY_BLOCKS: PhilosophyBlock[] = [
   {
@@ -353,6 +378,8 @@ interface StudioState {
   heroSettings: HeroSettings;
   navMenuItems: NavMenuItem[];
   projects: Project[];
+  categories: CategoryItem[];
+  galleryItems: GalleryItem[];
   philosophyBlocks: PhilosophyBlock[];
   servicesList: ServiceItem[];
   journalArticles: JournalArticle[];
@@ -378,11 +405,24 @@ interface StudioState {
   legalPages: LegalContent;
   isAdminMode: boolean;
   isCmsOpen: boolean;
+  adminUser: AdminUser | null;
+  isAdminAuthenticated: boolean;
+  isCheckingAuth: boolean;
+  adminAuthError: string | null;
+  isAdminLoginModalOpen: boolean;
+  isDirectAdminRoute: boolean;
+  activeAdminTab: string;
+  supabaseSyncStatus: SupabaseSyncStatus;
 }
 
 interface StudioContextType extends StudioState {
   setIsAdminMode: (active: boolean) => void;
   setIsCmsOpen: (open: boolean) => void;
+  setIsAdminLoginModalOpen: (open: boolean) => void;
+  setIsDirectAdminRoute: (open: boolean) => void;
+  setActiveAdminTab: (tab: string) => void;
+  loginAdmin: (email: string, password: string) => Promise<{ success: boolean; error: string | null }>;
+  logoutAdmin: () => Promise<void>;
   updateLogo: (newUrl: string) => void;
   updateHeroImage: (newUrl: string) => void;
   updateHeroContent: (title: string, subtitle: string, tagline: string) => void;
@@ -393,7 +433,20 @@ interface StudioContextType extends StudioState {
   updateProject: (updatedProject: Project) => void;
   deleteProject: (projectId: string) => void;
   moveProject: (id: string, direction: 'left' | 'right') => void;
-  
+
+  // Categories CRUD
+  addCategory: (category: CategoryItem) => void;
+  updateCategory: (category: CategoryItem) => void;
+  deleteCategory: (id: string) => void;
+  reorderCategories: (categories: CategoryItem[]) => void;
+
+  // Gallery CRUD
+  addGalleryItem: (item: GalleryItem) => void;
+  updateGalleryItem: (item: GalleryItem) => void;
+  deleteGalleryItem: (id: string) => void;
+  moveGalleryItemCategory: (id: string, newCategory: string) => void;
+  reorderGalleryItems: (items: GalleryItem[]) => void;
+
   // Philosophy CRUD
   addPhilosophyBlock: (block: PhilosophyBlock) => void;
   updatePhilosophyBlock: (block: PhilosophyBlock) => void;
@@ -471,11 +524,14 @@ interface StudioContextType extends StudioState {
   updateFooterSettings: (footer: FooterSettings) => void;
   updateLegalPages: (legal: LegalContent) => void;
 
-  // Backup & Import
+  // Backup, Storage & Supabase Sync
   exportBackupJSON: () => string;
   importBackupJSON: (jsonStr: string) => boolean;
   resetToDefaults: () => void;
   uploadFileAsDataUrl: (file: File) => Promise<string>;
+  uploadImageToStorage: (file: File, folder?: 'projects' | 'services' | 'team' | 'gallery' | 'brand' | 'uploads') => Promise<{ url: string; path: string; error: string | null }>;
+  syncWithSupabase: () => Promise<void>;
+  pushAllToSupabase: () => Promise<{ success: boolean; errors: string[] }>;
 
   // Google Drive Folder Synchronization & OAuth
   driveFolderId: string;
@@ -509,6 +565,8 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [heroSettings, setHeroSettings] = useState<HeroSettings>(INITIAL_HERO_SETTINGS);
   const [navMenuItems, setNavMenuItems] = useState<NavMenuItem[]>(INITIAL_NAV_MENU);
   const [projects, setProjects] = useState<Project[]>(INITIAL_PROJECTS);
+  const [categories, setCategories] = useState<CategoryItem[]>(INITIAL_CATEGORIES);
+  const [galleryItems, setGalleryItems] = useState<GalleryItem[]>(INITIAL_GALLERY_ITEMS);
   const [philosophyBlocks, setPhilosophyBlocks] = useState<PhilosophyBlock[]>(INITIAL_PHILOSOPHY_BLOCKS);
   const [servicesList, setServicesList] = useState<ServiceItem[]>(INITIAL_SERVICES);
   const [journalArticles, setJournalArticles] = useState<JournalArticle[]>(INITIAL_JOURNAL_ARTICLES);
@@ -542,6 +600,119 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const [isAdminMode, setIsAdminMode] = useState<boolean>(false);
   const [isCmsOpen, setIsCmsOpen] = useState<boolean>(false);
+  const [activeAdminTab, setActiveAdminTab] = useState<string>('overview');
+  const [isAdminLoginModalOpen, setIsAdminLoginModalOpen] = useState<boolean>(false);
+
+  // Supabase & Admin Authentication States
+  const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState<boolean>(true);
+  const [adminAuthError, setAdminAuthError] = useState<string | null>(null);
+
+  // Route check for /admin or #admin
+  const [isDirectAdminRoute, setIsDirectAdminRouteState] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return (
+      window.location.pathname.startsWith('/admin') ||
+      window.location.hash.startsWith('#admin') ||
+      window.location.search.includes('admin=true')
+    );
+  });
+
+  const setIsDirectAdminRoute = (isOpen: boolean) => {
+    setIsDirectAdminRouteState(isOpen);
+    if (typeof window !== 'undefined') {
+      if (isOpen) {
+        if (!window.location.pathname.startsWith('/admin')) {
+          try {
+            window.history.pushState(null, '', '/admin');
+          } catch {
+            window.location.hash = 'admin';
+          }
+        }
+      } else {
+        if (window.location.pathname.startsWith('/admin')) {
+          try {
+            window.history.pushState(null, '', '/');
+          } catch {
+            window.location.hash = '';
+          }
+        }
+      }
+    }
+  };
+
+  // Supabase Auth Session checking on mount & AuthState listener
+  useEffect(() => {
+    // Purge any legacy unverified tokens
+    try {
+      localStorage.removeItem('nilo_admin_auth');
+      sessionStorage.removeItem('nilo_admin_auth');
+    } catch {}
+
+    // Check active Supabase session
+    if (isSupabaseConfigured) {
+      supabase.auth.getSession().then(({ data: { session }, error }) => {
+        if (session?.user && !error) {
+          setIsAdminAuthenticated(true);
+          setAdminUser({
+            id: session.user.id,
+            email: session.user.email,
+            role: session.user.role,
+            lastSignInAt: session.user.last_sign_in_at
+          });
+        } else {
+          setIsAdminAuthenticated(false);
+          setAdminUser(null);
+        }
+        setIsCheckingAuth(false);
+      }).catch((err) => {
+        console.warn('Supabase auth session check failed:', err);
+        setIsCheckingAuth(false);
+      });
+
+      // Subscribe to auth state changes
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        if (session?.user) {
+          setIsAdminAuthenticated(true);
+          setAdminUser({
+            id: session.user.id,
+            email: session.user.email,
+            role: session.user.role,
+            lastSignInAt: session.user.last_sign_in_at
+          });
+        } else {
+          setIsAdminAuthenticated(false);
+          setAdminUser(null);
+          setIsAdminMode(false);
+        }
+        setIsCheckingAuth(false);
+      });
+
+      return () => {
+        subscription?.unsubscribe();
+      };
+    } else {
+      setIsCheckingAuth(false);
+    }
+  }, []);
+
+  // Supabase sync tracking
+  const [supabaseSyncStatus, setSupabaseSyncStatus] = useState<SupabaseSyncStatus>({
+    isConnected: false,
+    isSyncing: false,
+    lastSync: null,
+    error: null,
+    tables: {
+      projects: 0,
+      categories: 0,
+      services: 0,
+      team: 0,
+      gallery: 0,
+      site_content: 0,
+      journal: 0
+    }
+  });
 
   // Google Drive Integration States
   const [driveFolderId, setDriveFolderId] = useState<string>(DEFAULT_DRIVE_FOLDER_ID);
@@ -571,7 +742,7 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     };
   }, [driveFolderId]);
 
-  // Load persisted state on mount
+  // Load persisted state on mount & sync with Supabase
   useEffect(() => {
     try {
       // Clear older version keys to ensure new default assets take effect immediately
@@ -592,7 +763,6 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           }
         }
         if (parsed.heroImageUrl) {
-          // If cached image is old unsplash default, use updated DEFAULT_HERO_IMAGE_URL
           if (parsed.heroImageUrl.includes('unsplash.com')) {
             setHeroImageUrl(DEFAULT_HERO_IMAGE_URL);
           } else {
@@ -610,6 +780,8 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         }
         if (Array.isArray(parsed.navMenuItems)) setNavMenuItems(parsed.navMenuItems);
         if (Array.isArray(parsed.projects) && parsed.projects.length > 0) setProjects(parsed.projects);
+        if (Array.isArray(parsed.categories) && parsed.categories.length > 0) setCategories(parsed.categories);
+        if (Array.isArray(parsed.galleryItems) && parsed.galleryItems.length > 0) setGalleryItems(parsed.galleryItems);
         if (Array.isArray(parsed.philosophyBlocks) && parsed.philosophyBlocks.length > 0) setPhilosophyBlocks(parsed.philosophyBlocks);
         if (Array.isArray(parsed.servicesList) && parsed.servicesList.length > 0) setServicesList(parsed.servicesList);
         if (Array.isArray(parsed.journalArticles) && parsed.journalArticles.length > 0) setJournalArticles(parsed.journalArticles);
@@ -637,6 +809,9 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     } catch (e) {
       console.error('Failed to load studio state from localStorage', e);
     }
+
+    // Trigger initial background sync with Supabase
+    syncWithSupabase();
   }, []);
 
   // Save state helper
@@ -652,6 +827,8 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         heroSettings,
         navMenuItems,
         projects,
+        categories,
+        galleryItems,
         philosophyBlocks,
         servicesList,
         journalArticles,
@@ -675,11 +852,208 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         socialLinks,
         footerSettings,
         legalPages,
+        activeAdminTab,
         ...updatedState
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(currentState));
     } catch (e) {
       console.error('Failed to save state to localStorage', e);
+    }
+  };
+
+  // Supabase Data Fetching & Syncing
+  const syncWithSupabase = async () => {
+    setSupabaseSyncStatus(prev => ({ ...prev, isSyncing: true, error: null }));
+    try {
+      const connection = await checkSupabaseConnection();
+      if (!connection.isConnected) {
+        setSupabaseSyncStatus(prev => ({
+          ...prev,
+          isConnected: false,
+          isSyncing: false,
+          error: connection.error || 'Could not connect to Supabase'
+        }));
+        return;
+      }
+
+      const cmsData = await fetchCmsDataFromSupabase();
+
+      if (cmsData.projects && cmsData.projects.length > 0) {
+        setProjects(cmsData.projects);
+      }
+      if (cmsData.categories && cmsData.categories.length > 0) {
+        setCategories(cmsData.categories);
+      }
+      if (cmsData.services && cmsData.services.length > 0) {
+        setServicesList(cmsData.services);
+      }
+      if (cmsData.team && cmsData.team.length > 0) {
+        setTeamMembers(cmsData.team);
+      }
+      if (cmsData.gallery && cmsData.gallery.length > 0) {
+        setGalleryItems(cmsData.gallery);
+      }
+      if (cmsData.journal && cmsData.journal.length > 0) {
+        setJournalArticles(cmsData.journal);
+      }
+
+      // Merge site content
+      if (cmsData.siteContent) {
+        if (cmsData.siteContent.heroSettings) setHeroSettings(cmsData.siteContent.heroSettings);
+        if (cmsData.siteContent.heroTitle) setHeroTitle(cmsData.siteContent.heroTitle);
+        if (cmsData.siteContent.heroSubtitle) setHeroSubtitle(cmsData.siteContent.heroSubtitle);
+        if (cmsData.siteContent.heroTagline) setHeroTagline(cmsData.siteContent.heroTagline);
+        if (cmsData.siteContent.logoUrl) setLogoUrl(cmsData.siteContent.logoUrl);
+        if (cmsData.siteContent.heroImageUrl) setHeroImageUrl(cmsData.siteContent.heroImageUrl);
+        if (cmsData.siteContent.contactDetails) setContactDetails(cmsData.siteContent.contactDetails);
+        if (cmsData.siteContent.showcaseHeader) setShowcaseHeader(cmsData.siteContent.showcaseHeader);
+        if (cmsData.siteContent.catalogHeader) setCatalogHeader(cmsData.siteContent.catalogHeader);
+      }
+
+      setSupabaseSyncStatus({
+        isConnected: true,
+        isSyncing: false,
+        lastSync: new Date().toLocaleTimeString(),
+        error: null,
+        tables: {
+          projects: cmsData.projects?.length || 0,
+          categories: cmsData.categories?.length || 0,
+          services: cmsData.services?.length || 0,
+          team: cmsData.team?.length || 0,
+          gallery: cmsData.gallery?.length || 0,
+          site_content: cmsData.siteContent ? Object.keys(cmsData.siteContent).length : 0,
+          journal: cmsData.journal?.length || 0
+        }
+      });
+    } catch (err: any) {
+      console.warn('Supabase sync notice:', err.message);
+      setSupabaseSyncStatus(prev => ({
+        ...prev,
+        isSyncing: false,
+        error: err.message || 'Error during database sync'
+      }));
+    }
+  };
+
+  const pushAllToSupabase = async (): Promise<{ success: boolean; errors: string[] }> => {
+    setSupabaseSyncStatus(prev => ({ ...prev, isSyncing: true, error: null }));
+    const result = await seedAllDataToSupabase({
+      projects,
+      categories,
+      services: servicesList,
+      team: teamMembers,
+      gallery: galleryItems,
+      journal: journalArticles,
+      siteContent: {
+        heroSettings,
+        heroTitle,
+        heroSubtitle,
+        heroTagline,
+        logoUrl,
+        heroImageUrl,
+        contactDetails,
+        showcaseHeader,
+        catalogHeader
+      }
+    });
+
+    await syncWithSupabase();
+    return result;
+  };
+
+  const uploadImageToStorage = async (
+    file: File,
+    folder: 'projects' | 'services' | 'team' | 'gallery' | 'brand' | 'uploads' = 'uploads'
+  ): Promise<{ url: string; path: string; error: string | null }> => {
+    try {
+      const storageResult = await uploadImageToSupabaseStorage(file, folder);
+      if (storageResult.url && !storageResult.error) {
+        return storageResult;
+      }
+      const dataUrl = await uploadFileAsDataUrl(file);
+      return {
+        url: dataUrl,
+        path: `local/${file.name}`,
+        error: storageResult.error
+      };
+    } catch {
+      const dataUrl = await uploadFileAsDataUrl(file);
+      return {
+        url: dataUrl,
+        path: `local/${file.name}`,
+        error: null
+      };
+    }
+  };
+
+  // Admin Auth Helpers - Strict Supabase Authentication Only
+  const loginAdmin = async (email: string, password: string): Promise<{ success: boolean; error: string | null }> => {
+    setAdminAuthError(null);
+    const trimmedEmail = email?.trim() || '';
+
+    if (!trimmedEmail || !password) {
+      const err = 'Both email and password are required for Supabase authentication.';
+      setAdminAuthError(err);
+      return { success: false, error: err };
+    }
+
+    if (!isSupabaseConfigured) {
+      const err = 'Supabase credentials are not configured. Please supply VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to log in.';
+      setAdminAuthError(err);
+      return { success: false, error: err };
+    }
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: trimmedEmail,
+        password: password
+      });
+
+      if (error) {
+        setAdminAuthError(error.message);
+        return { success: false, error: error.message };
+      }
+
+      if (data?.session?.user) {
+        setAdminUser({
+          id: data.session.user.id,
+          email: data.session.user.email,
+          role: data.session.user.role,
+          lastSignInAt: data.session.user.last_sign_in_at
+        });
+        setIsAdminAuthenticated(true);
+        setIsAdminMode(true);
+        setAdminAuthError(null);
+        return { success: true, error: null };
+      }
+
+      const err = 'Unable to establish an authenticated Supabase session.';
+      setAdminAuthError(err);
+      return { success: false, error: err };
+    } catch (err: any) {
+      const message = err.message || 'Supabase authentication failed';
+      setAdminAuthError(message);
+      return { success: false, error: message };
+    }
+  };
+
+  const logoutAdmin = async (): Promise<void> => {
+    try {
+      if (isSupabaseConfigured) {
+        await supabase.auth.signOut();
+      }
+    } catch (err) {
+      console.warn('Supabase signOut error:', err);
+    } finally {
+      setIsAdminAuthenticated(false);
+      setAdminUser(null);
+      setIsAdminMode(false);
+      setIsCmsOpen(false);
+      setAdminAuthError(null);
+      try {
+        localStorage.removeItem('nilo_admin_auth');
+        sessionStorage.removeItem('nilo_admin_auth');
+      } catch {}
     }
   };
 
@@ -701,12 +1075,14 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const updateLogo = (newUrl: string) => {
     setLogoUrl(newUrl);
     saveState({ logoUrl: newUrl });
+    saveSiteContentToSupabase('logoUrl', newUrl).catch(() => {});
   };
 
   const updateHeroImage = (newUrl: string) => {
     setHeroImageUrl(newUrl);
     setHeroSettings((prev) => ({ ...prev, heroImage: newUrl }));
     saveState({ heroImageUrl: newUrl, heroSettings: { ...heroSettings, heroImage: newUrl } });
+    saveSiteContentToSupabase('heroImageUrl', newUrl).catch(() => {});
   };
 
   const updateHeroContent = (title: string, subtitle: string, tagline: string) => {
@@ -716,6 +1092,7 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const updated = { ...heroSettings, title, subtitle, tagline };
     setHeroSettings(updated);
     saveState({ heroTitle: title, heroSubtitle: subtitle, heroTagline: tagline, heroSettings: updated });
+    saveSiteContentToSupabase('heroSettings', updated).catch(() => {});
   };
 
   const updateHeroSettings = (settings: HeroSettings) => {
@@ -731,6 +1108,7 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       heroTagline: settings.tagline,
       heroImageUrl: settings.heroImage
     });
+    saveSiteContentToSupabase('heroSettings', settings).catch(() => {});
   };
 
   const updateNavMenuItems = (items: NavMenuItem[]) => {
@@ -739,16 +1117,19 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   };
 
   const updateProjectImage = (projectId: string, newUrl: string) => {
-    const updated = projects.map((p) =>
-      p.id === projectId
-        ? {
-            ...p,
-            heroImage: newUrl,
-            previewImage: newUrl,
-            galleryImages: p.galleryImages.length > 0 ? [newUrl, ...p.galleryImages.slice(1)] : [newUrl]
-          }
-        : p
-    );
+    const updated = projects.map((p) => {
+      if (p.id === projectId) {
+        const item = {
+          ...p,
+          heroImage: newUrl,
+          previewImage: newUrl,
+          galleryImages: p.galleryImages.length > 0 ? [newUrl, ...p.galleryImages.slice(1)] : [newUrl]
+        };
+        upsertProjectToSupabase(item).catch(() => {});
+        return item;
+      }
+      return p;
+    });
     setProjects(updated);
     saveState({ projects: updated });
   };
@@ -757,18 +1138,21 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const updated = [project, ...projects];
     setProjects(updated);
     saveState({ projects: updated });
+    upsertProjectToSupabase(project).catch(() => {});
   };
 
   const updateProject = (updatedProject: Project) => {
     const updated = projects.map((p) => (p.id === updatedProject.id ? updatedProject : p));
     setProjects(updated);
     saveState({ projects: updated });
+    upsertProjectToSupabase(updatedProject).catch(() => {});
   };
 
   const deleteProject = (projectId: string) => {
     const updated = projects.filter((p) => p.id !== projectId);
     setProjects(updated);
     saveState({ projects: updated });
+    deleteProjectFromSupabase(projectId).catch(() => {});
   };
 
   const moveProject = (id: string, direction: 'left' | 'right') => {
@@ -784,6 +1168,73 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     setProjects(updated);
     saveState({ projects: updated });
+  };
+
+  // Categories CRUD
+  const addCategory = (category: CategoryItem) => {
+    const updated = [...categories, category];
+    setCategories(updated);
+    saveState({ categories: updated });
+    upsertCategoryToSupabase(category).catch(() => {});
+  };
+
+  const updateCategory = (category: CategoryItem) => {
+    const updated = categories.map((c) => (c.id === category.id ? category : c));
+    setCategories(updated);
+    saveState({ categories: updated });
+    upsertCategoryToSupabase(category).catch(() => {});
+  };
+
+  const deleteCategory = (id: string) => {
+    const updated = categories.filter((c) => c.id !== id);
+    setCategories(updated);
+    saveState({ categories: updated });
+    deleteCategoryFromSupabase(id).catch(() => {});
+  };
+
+  const reorderCategories = (newOrder: CategoryItem[]) => {
+    setCategories(newOrder);
+    saveState({ categories: newOrder });
+  };
+
+  // Gallery CRUD
+  const addGalleryItem = (item: GalleryItem) => {
+    const updated = [item, ...galleryItems];
+    setGalleryItems(updated);
+    saveState({ galleryItems: updated });
+    upsertGalleryItemToSupabase(item).catch(() => {});
+  };
+
+  const updateGalleryItem = (item: GalleryItem) => {
+    const updated = galleryItems.map((g) => (g.id === item.id ? item : g));
+    setGalleryItems(updated);
+    saveState({ galleryItems: updated });
+    upsertGalleryItemToSupabase(item).catch(() => {});
+  };
+
+  const deleteGalleryItem = (id: string) => {
+    const updated = galleryItems.filter((g) => g.id !== id);
+    setGalleryItems(updated);
+    saveState({ galleryItems: updated });
+    deleteGalleryItemFromSupabase(id).catch(() => {});
+  };
+
+  const moveGalleryItemCategory = (id: string, newCategory: string) => {
+    const updated = galleryItems.map((g) => {
+      if (g.id === id) {
+        const modified = { ...g, category: newCategory };
+        upsertGalleryItemToSupabase(modified).catch(() => {});
+        return modified;
+      }
+      return g;
+    });
+    setGalleryItems(updated);
+    saveState({ galleryItems: updated });
+  };
+
+  const reorderGalleryItems = (items: GalleryItem[]) => {
+    setGalleryItems(items);
+    saveState({ galleryItems: items });
   };
 
   // Philosophy CRUD
@@ -810,18 +1261,21 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const updated = [...servicesList, service];
     setServicesList(updated);
     saveState({ servicesList: updated });
+    upsertServiceToSupabase(service).catch(() => {});
   };
 
   const updateServiceItem = (service: ServiceItem) => {
     const updated = servicesList.map((s) => (s.id === service.id ? service : s));
     setServicesList(updated);
     saveState({ servicesList: updated });
+    upsertServiceToSupabase(service).catch(() => {});
   };
 
   const deleteServiceItem = (id: string) => {
     const updated = servicesList.filter((s) => s.id !== id);
     setServicesList(updated);
     saveState({ servicesList: updated });
+    deleteServiceFromSupabase(id).catch(() => {});
   };
 
   // Journal CRUD
@@ -829,24 +1283,28 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const updated = [article, ...journalArticles];
     setJournalArticles(updated);
     saveState({ journalArticles: updated });
+    upsertJournalArticleToSupabase(article).catch(() => {});
   };
 
   const updateJournalArticle = (article: JournalArticle) => {
     const updated = journalArticles.map((a) => (a.id === article.id ? article : a));
     setJournalArticles(updated);
     saveState({ journalArticles: updated });
+    upsertJournalArticleToSupabase(article).catch(() => {});
   };
 
   const deleteJournalArticle = (id: string) => {
     const updated = journalArticles.filter((a) => a.id !== id);
     setJournalArticles(updated);
     saveState({ journalArticles: updated });
+    deleteJournalArticleFromSupabase(id).catch(() => {});
   };
 
   // Contact CRUD
   const updateContactDetails = (details: ContactDetails) => {
     setContactDetails(details);
     saveState({ contactDetails: details });
+    saveSiteContentToSupabase('contactDetails', details).catch(() => {});
   };
 
   // Header CRUD
@@ -854,12 +1312,14 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const newHeader = { title, subtitle };
     setShowcaseHeader(newHeader);
     saveState({ showcaseHeader: newHeader });
+    saveSiteContentToSupabase('showcaseHeader', newHeader).catch(() => {});
   };
 
   const updateCatalogHeader = (title: string, subtitle: string) => {
     const newHeader = { title, subtitle };
     setCatalogHeader(newHeader);
     saveState({ catalogHeader: newHeader });
+    saveSiteContentToSupabase('catalogHeader', newHeader).catch(() => {});
   };
 
   // Team
@@ -867,16 +1327,19 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const updated = [...teamMembers, member];
     setTeamMembers(updated);
     saveState({ teamMembers: updated });
+    upsertTeamMemberToSupabase(member).catch(() => {});
   };
   const updateTeamMember = (member: TeamMember) => {
     const updated = teamMembers.map((m) => (m.id === member.id ? member : m));
     setTeamMembers(updated);
     saveState({ teamMembers: updated });
+    upsertTeamMemberToSupabase(member).catch(() => {});
   };
   const deleteTeamMember = (id: string) => {
     const updated = teamMembers.filter((m) => m.id !== id);
     setTeamMembers(updated);
     saveState({ teamMembers: updated });
+    deleteTeamMemberFromSupabase(id).catch(() => {});
   };
 
   // Clients
@@ -1135,6 +1598,8 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       if (parsed.heroSettings) setHeroSettings(parsed.heroSettings);
       if (Array.isArray(parsed.navMenuItems)) setNavMenuItems(parsed.navMenuItems);
       if (Array.isArray(parsed.projects)) setProjects(parsed.projects);
+      if (Array.isArray(parsed.categories)) setCategories(parsed.categories);
+      if (Array.isArray(parsed.galleryItems)) setGalleryItems(parsed.galleryItems);
       if (Array.isArray(parsed.philosophyBlocks)) setPhilosophyBlocks(parsed.philosophyBlocks);
       if (Array.isArray(parsed.servicesList)) setServicesList(parsed.servicesList);
       if (Array.isArray(parsed.journalArticles)) setJournalArticles(parsed.journalArticles);
@@ -1311,6 +1776,8 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setHeroSettings(INITIAL_HERO_SETTINGS);
     setNavMenuItems(INITIAL_NAV_MENU);
     setProjects(INITIAL_PROJECTS);
+    setCategories(INITIAL_CATEGORIES);
+    setGalleryItems(INITIAL_GALLERY_ITEMS);
     setPhilosophyBlocks(INITIAL_PHILOSOPHY_BLOCKS);
     setServicesList(INITIAL_SERVICES);
     setJournalArticles(INITIAL_JOURNAL_ARTICLES);
@@ -1355,6 +1822,8 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         heroSettings,
         navMenuItems,
         projects,
+        categories,
+        galleryItems,
         philosophyBlocks,
         servicesList,
         journalArticles,
@@ -1380,8 +1849,21 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         legalPages,
         isAdminMode,
         isCmsOpen,
+        adminUser,
+        isAdminAuthenticated,
+        isCheckingAuth,
+        adminAuthError,
+        isAdminLoginModalOpen,
+        isDirectAdminRoute,
+        activeAdminTab,
+        supabaseSyncStatus,
         setIsAdminMode,
         setIsCmsOpen,
+        setIsAdminLoginModalOpen,
+        setIsDirectAdminRoute,
+        setActiveAdminTab,
+        loginAdmin,
+        logoutAdmin,
         updateLogo,
         updateHeroImage,
         updateHeroContent,
@@ -1392,6 +1874,15 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         updateProject,
         deleteProject,
         moveProject,
+        addCategory,
+        updateCategory,
+        deleteCategory,
+        reorderCategories,
+        addGalleryItem,
+        updateGalleryItem,
+        deleteGalleryItem,
+        moveGalleryItemCategory,
+        reorderGalleryItems,
         addPhilosophyBlock,
         updatePhilosophyBlock,
         deletePhilosophyBlock,
@@ -1447,6 +1938,9 @@ export const StudioProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         importBackupJSON,
         resetToDefaults,
         uploadFileAsDataUrl,
+        uploadImageToStorage,
+        syncWithSupabase,
+        pushAllToSupabase,
 
         // Google Drive Synchronization & OAuth
         driveFolderId,

@@ -17,7 +17,8 @@ import { CmsModal } from './components/CmsModal';
 import { StudioPreloader } from './components/StudioPreloader';
 import { GoogleDriveFolderSyncModal } from './components/GoogleDriveFolderSyncModal';
 import { StudioAdminToolbar } from './components/StudioAdminToolbar';
-import { Compass, ArrowUp } from 'lucide-react';
+import { AdminAuthModal } from './components/AdminAuthModal';
+import { Compass, ArrowUp, Loader2, ShieldCheck } from 'lucide-react';
 
 function MainAppContent() {
   const {
@@ -26,8 +27,22 @@ function MainAppContent() {
     sectionVisibility,
     footerSettings,
     isGoogleDriveModalOpen,
-    setIsGoogleDriveModalOpen
+    setIsGoogleDriveModalOpen,
+    isDirectAdminRoute,
+    setIsDirectAdminRoute,
+    isAdminAuthenticated,
+    isCheckingAuth,
+    isAdminLoginModalOpen,
+    setIsAdminLoginModalOpen,
+    setIsCmsOpen
   } = useStudio();
+
+  // Auto-open CMS when authenticated on /admin route
+  React.useEffect(() => {
+    if (isDirectAdminRoute && isAdminAuthenticated) {
+      setIsCmsOpen(true);
+    }
+  }, [isDirectAdminRoute, isAdminAuthenticated, setIsCmsOpen]);
 
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [fullscreenImage, setFullscreenImage] = useState<{
@@ -222,6 +237,17 @@ function MainAppContent() {
       <GoogleDriveFolderSyncModal
         isOpen={isGoogleDriveModalOpen}
         onClose={() => setIsGoogleDriveModalOpen(false)}
+      />
+
+      {/* Supabase Admin IAM Authentication Modal (For protected /admin route and login triggers) */}
+      <AdminAuthModal
+        isOpen={isAdminLoginModalOpen || (isDirectAdminRoute && !isAdminAuthenticated && !isCheckingAuth)}
+        onClose={() => {
+          setIsAdminLoginModalOpen(false);
+          if (isDirectAdminRoute && !isAdminAuthenticated) {
+            setIsDirectAdminRoute(false);
+          }
+        }}
       />
 
       {/* Floating Studio Admin Toolbar */}

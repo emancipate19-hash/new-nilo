@@ -1,119 +1,7 @@
-// Google Drive Image IDs provided for NILO AXIS STUDIO assets
-export const GOOGLE_DRIVE_IDS = {
-  logo: '17Ptq0XrrfinmuuF77SWpRVcPFfBdX0VA',
-  hero: '1OkQM2tB1qLOiHvoqm68LnBQPMgnzHkR5',
-  project1: '1c7jmTOuBj9VHwxGgdaCcl5tg3SJddsjm',
-  project2: '1Fkp3YxPAUV5I1dpUCkuy7t3DUHcEirdD',
-  project3: '1gg-0dwTCHnpY7e2vQJ8gMGyhMWYtZTZI',
-  project4: '178RzJjY1nQwVjXYbqKwuvV-TQX_Y6Yoo',
-  project5: '1wMR9Eh0WAbDo6AyUTerk2Xm8ZeZcrbyP',
-  project6: '13q-5PaMirqpM705lHUNi_Z3qjUv7S_Qn',
-  project7: '1fwOR6DYVMZ58EZSL3ll88BqAQOCisJzS',
-  project8: '1I-08l62XYxJ13SaBnto6rR26hDRuCir3',
-  project9: '1OkQM2tB1qLOiHvoqm68LnBQPMgnzHkR5',
-  staffDawit: '1Vp_0adt1fIK1uHNFbaRwojtAG27roSnW',
-  staffKidus: '1I_VjQITznicS9dLapt8yS5EaGo4e9qys',
-  staffMilki: '10ErJNl9jtEAnUlL0COEICSvRlZ3IEFAQ',
-  // Interior Design Specific Drive IDs
-  interior1: '1clNls2iQU3-i0DMAqyn1uFyGyMzjU5Ls',
-  interior2: '1SYBEc7DknemGD5WwMXRhWHnoa2Ph5K3h',
-  interior3: '1Rcu33YkaOoq8RFH9mZHay5kS5uSOaVlM',
-  interior4: '1DF7BwjgPZdvg_C7pd6DwOfe93wrEKgLX',
-  interior5: '1Sh4glAXq_9FBuuI_ilhhkqIilEzE2Lv3',
-  interior6: '1YFBBCv-21U3rzDrwow1DFWClBRG9gmoI',
-  interior7: '1ej3mW3nJixsiVAEPVYEvPWB_q9m5lgjM',
-  interior8: '1rSBM9om0BXG-X-_pj6J7fLhCo3HP6drv',
-  interior9: '1Ycafha6Grb0MqPVpdnOeN4GLGmRgtXbd',
-  interior10: '1NMTHKIfDTNjk14o7s13NwyIprlzPg7RR',
-  // Residential Architecture Specific Drive IDs
-  residential1: '18hBAxST0xvYKNFEDPNdY5-GshvnZVDox',
-  residential2: '137zlUWBK26fwpIezu8IryX2iZ-IiFwiZ',
-  residential3: '1F6B7EL1labzKrBBWFqsD4vh2IDd4Fp39',
-  residential4: '1OiHWECoiUs6K2XAWSKajTTypxTL5P2DZ',
-  residential5: '1a2yUqxluYKOajy80A1PdQB8lAvurrdqk',
-  residential6: '14jZGotjxAtnKgHWYRq_BhVXnIBkz5BZG',
-  residential7: '1kh9LbepW81F61MvpBKdBrEF5t1IED-Vi',
-  residential8: '1BO1gWpq8sCKzZps1uNlQN8JVsraTLm_b',
-  residential9: '1a8keknMPxs7UXkedjhs4Pqe4fj-kqsYu',
-  residential10: '1TYoICSf-mJUhi8XUrfpW78hRjWzz9_rS'
-};
+// Base Supabase Storage Bucket Public CDN URL
+export const SUPABASE_STORAGE_URL = 'https://eyzsdftddznlmonfpnko.supabase.co/storage/v1/object/public/website-assets';
 
-// High-performance direct CDN URLs for Google Drive assets
-export const logoImg = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.logo}`;
-export const logoThumbnailImg = `https://drive.google.com/thumbnail?id=${GOOGLE_DRIVE_IDS.logo}&sz=w1000`;
-
-export const heroTowerImg = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.hero}`;
-export const projectImg1 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.project1}`;
-export const projectImg2 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.project2}`;
-export const projectImg3 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.project3}`;
-export const projectImg4 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.project4}`;
-export const projectImg5 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.project5}`;
-export const projectImg6 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.project6}`;
-export const projectImg7 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.project7}`;
-export const projectImg8 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.project8}`;
-export const projectImg9 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.project9}`;
-
-// Interior Design Images
-export const interiorImg1 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.interior1}`;
-export const interiorImg2 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.interior2}`;
-export const interiorImg3 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.interior3}`;
-export const interiorImg4 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.interior4}`;
-export const interiorImg5 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.interior5}`;
-export const interiorImg6 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.interior6}`;
-export const interiorImg7 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.interior7}`;
-export const interiorImg8 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.interior8}`;
-export const interiorImg9 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.interior9}`;
-export const interiorImg10 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.interior10}`;
-
-export const INTERIOR_DESIGN_IMAGES = [
-  interiorImg1,
-  interiorImg2,
-  interiorImg3,
-  interiorImg4,
-  interiorImg5,
-  interiorImg6,
-  interiorImg7,
-  interiorImg8,
-  interiorImg9,
-  interiorImg10
-];
-
-// Residential Architecture Images
-export const residentialImg1 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.residential1}`;
-export const residentialImg2 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.residential2}`;
-export const residentialImg3 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.residential3}`;
-export const residentialImg4 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.residential4}`;
-export const residentialImg5 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.residential5}`;
-export const residentialImg6 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.residential6}`;
-export const residentialImg7 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.residential7}`;
-export const residentialImg8 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.residential8}`;
-export const residentialImg9 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.residential9}`;
-export const residentialImg10 = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.residential10}`;
-
-export const RESIDENTIAL_ARCHITECTURE_IMAGES = [
-  residentialImg1,
-  residentialImg2,
-  residentialImg3,
-  residentialImg4,
-  residentialImg5,
-  residentialImg6,
-  residentialImg7,
-  residentialImg8,
-  residentialImg9,
-  residentialImg10
-];
-
-export const staffDawitImg = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.staffDawit}`;
-export const staffKidusImg = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.staffKidus}`;
-export const staffMilkiImg = `https://lh3.googleusercontent.com/d/${GOOGLE_DRIVE_IDS.staffMilki}`;
-
-// Aliases for compatibility
-export const terrainVillaImg = residentialImg1;
-export const lumenCenterImg = projectImg2;
-export const boleTowerImg = projectImg3;
-export const hawassaRetreatImg = residentialImg2;
-
-// Default Brand Assets for NILO AXIS STUDIO
+// Default Studio Vector Emblem Logo
 export const FALLBACK_VECTOR_LOGO_URL = `data:image/svg+xml;utf8,${encodeURIComponent(`
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
   <defs>
@@ -160,7 +48,82 @@ export const FALLBACK_VECTOR_LOGO_URL = `data:image/svg+xml;utf8,${encodeURIComp
 </svg>
 `)}`;
 
-// Primary Logo is the provided Google Drive Logo Asset
+// Primary Logo & Hero Image
+export const logoImg = FALLBACK_VECTOR_LOGO_URL;
+export const logoThumbnailImg = FALLBACK_VECTOR_LOGO_URL;
+
+export const heroTowerImg = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=2000&q=85';
+export const projectImg1 = 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1600&q=80';
+export const projectImg2 = 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1600&q=80';
+export const projectImg3 = 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1600&q=80';
+export const projectImg4 = 'https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&fit=crop&w=1600&q=80';
+export const projectImg5 = 'https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1600&q=80';
+export const projectImg6 = 'https://images.unsplash.com/photo-1600573472550-8090b5e0745e?auto=format&fit=crop&w=1600&q=80';
+export const projectImg7 = 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1600&q=80';
+export const projectImg8 = 'https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1600&q=80';
+export const projectImg9 = 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1600&q=80';
+
+// Interior Design Images (Supabase Storage & high-res architectural assets)
+export const interiorImg1 = 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1600&q=80';
+export const interiorImg2 = 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1600&q=80';
+export const interiorImg3 = 'https://images.unsplash.com/photo-1618219908412-a29a1bb7b86e?auto=format&fit=crop&w=1600&q=80';
+export const interiorImg4 = 'https://images.unsplash.com/photo-1616046229478-9901c5536a45?auto=format&fit=crop&w=1600&q=80';
+export const interiorImg5 = 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1600&q=80';
+export const interiorImg6 = 'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1600&q=80';
+export const interiorImg7 = 'https://images.unsplash.com/photo-1600585152220-90363fe7e115?auto=format&fit=crop&w=1600&q=80';
+export const interiorImg8 = 'https://images.unsplash.com/photo-1617806118233-18e1de247200?auto=format&fit=crop&w=1600&q=80';
+export const interiorImg9 = 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=1600&q=80';
+export const interiorImg10 = 'https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&w=1600&q=80';
+
+export const INTERIOR_DESIGN_IMAGES = [
+  interiorImg1,
+  interiorImg2,
+  interiorImg3,
+  interiorImg4,
+  interiorImg5,
+  interiorImg6,
+  interiorImg7,
+  interiorImg8,
+  interiorImg9,
+  interiorImg10
+];
+
+// Residential Architecture Images
+export const residentialImg1 = 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1600&q=80';
+export const residentialImg2 = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=80';
+export const residentialImg3 = 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1600&q=80';
+export const residentialImg4 = 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1600&q=80';
+export const residentialImg5 = 'https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&fit=crop&w=1600&q=80';
+export const residentialImg6 = 'https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1600&q=80';
+export const residentialImg7 = 'https://images.unsplash.com/photo-1600573472550-8090b5e0745e?auto=format&fit=crop&w=1600&q=80';
+export const residentialImg8 = 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1600&q=80';
+export const residentialImg9 = 'https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1600&q=80';
+export const residentialImg10 = 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1600&q=80';
+
+export const RESIDENTIAL_ARCHITECTURE_IMAGES = [
+  residentialImg1,
+  residentialImg2,
+  residentialImg3,
+  residentialImg4,
+  residentialImg5,
+  residentialImg6,
+  residentialImg7,
+  residentialImg8,
+  residentialImg9,
+  residentialImg10
+];
+
+export const staffDawitImg = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80';
+export const staffKidusImg = 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80';
+export const staffMilkiImg = 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80';
+
+// Aliases for compatibility
+export const terrainVillaImg = residentialImg1;
+export const lumenCenterImg = projectImg2;
+export const boleTowerImg = projectImg3;
+export const hawassaRetreatImg = residentialImg2;
+
+// Primary Studio Logo
 export const DEFAULT_LOGO_URL = logoImg;
 
 // Hero Image

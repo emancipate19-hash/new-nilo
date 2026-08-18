@@ -139,6 +139,7 @@ export interface JournalArticle {
   author?: string;
   status?: 'published' | 'draft';
   content?: string;
+  isVisible?: boolean;
 }
 
 export interface PhilosophyBlock {
@@ -162,6 +163,10 @@ export interface ServiceItem {
   description: string;
   iconName?: string;
   isVisible?: boolean;
+  number?: string;
+  tagline?: string;
+  deliverables?: string[];
+  specs?: any;
 }
 
 export interface ContactDetails {
@@ -206,7 +211,9 @@ export interface TeamMember {
   bio: string;
   role?: string;
   experience?: string;
-  socialLinks: {
+  focus?: string;
+  award?: string;
+  socialLinks?: {
     linkedin?: string;
     instagram?: string;
     x?: string;
@@ -320,6 +327,73 @@ export interface CustomSection {
   buttonText?: string;
   buttonLink?: string;
   isVisible: boolean;
+}
+
+export interface CategoryItem {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  icon?: string;
+  isVisible: boolean;
+  sortOrder: number;
+}
+
+export interface GalleryItem {
+  id: string;
+  title: string;
+  category: string;
+  imageUrl: string;
+  thumbnailUrl?: string;
+  caption?: string;
+  date?: string;
+  tags?: string[];
+  aspectRatio?: 'landscape' | 'portrait' | 'square' | 'wide';
+  isVisible: boolean;
+  sortOrder?: number;
+}
+
+export interface SiteContentItem {
+  id: string;
+  section: string;
+  title: string;
+  subtitle?: string;
+  tagline?: string;
+  description?: string;
+  contentJson?: any;
+  updatedAt?: string;
+}
+
+export interface SupabaseSyncStatus {
+  isConnected: boolean;
+  isSyncing: boolean;
+  lastSync?: string | null;
+  lastSyncedAt?: string | null;
+  error: string | null;
+  tables?: {
+    projects: number;
+    categories: number;
+    services: number;
+    team: number;
+    gallery: number;
+    site_content: number;
+    journal: number;
+  };
+  tablesCount?: {
+    projects: number;
+    categories: number;
+    services: number;
+    team: number;
+    journal: number;
+    gallery: number;
+  };
+}
+
+export interface AdminUser {
+  id: string;
+  email?: string;
+  role?: string;
+  lastSignInAt?: string;
 }
 
 export interface SectionVisibility {

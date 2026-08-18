@@ -4,7 +4,8 @@ import {
   X, Save, RotateCcw, Download, Upload, Plus, Trash2, Eye, EyeOff,
   MoveUp, MoveDown, Layers, Image as ImageIcon, FileText, Settings,
   Users, Award, HelpCircle, MessageSquare, Layout, Palette, Globe,
-  ShieldAlert, Sliders, Check, ArrowRight, Video, Sparkles, Compass, FolderSync
+  ShieldAlert, Sliders, Check, ArrowRight, Video, Sparkles, Compass, FolderSync,
+  LogOut, ShieldCheck
 } from 'lucide-react';
 import { Project, TeamMember, ServiceItem, PhilosophyBlock, BeforeAfterPair, Panorama360Item, ProcessStep, FaqItem, AwardItem, ClientItem, TestimonialItem, CustomSection } from '../types';
 
@@ -89,7 +90,9 @@ export const CmsModal: React.FC = () => {
     importBackupJSON,
     resetToDefaults,
     uploadFileAsDataUrl,
-    setIsGoogleDriveModalOpen
+    setIsGoogleDriveModalOpen,
+    adminUser,
+    logoutAdmin
   } = useStudio();
 
   const [activeTab, setActiveTab] = useState<string>('sections');
@@ -135,20 +138,28 @@ export const CmsModal: React.FC = () => {
       <div className="w-full max-w-7xl h-[92vh] bg-stone-950 border border-stone-800 rounded-2xl flex flex-col shadow-2xl overflow-hidden relative">
         
         {/* Header Bar */}
-        <div className="px-6 py-4 border-b border-stone-800 flex items-center justify-between bg-stone-900/60">
+        <div className="px-6 py-4 border-b border-stone-800 flex flex-wrap items-center justify-between gap-3 bg-stone-900/60">
           <div className="flex items-center space-x-3">
             <div className="w-3 h-3 rounded-full bg-amber-500 animate-pulse" />
             <div>
-              <h2 className="text-sm font-bold tracking-widest text-amber-400 uppercase">
-                NILO AXIS STUDIO — CMS & PORTFOLIO ENGINE
-              </h2>
+              <div className="flex items-center gap-2">
+                <h2 className="text-sm font-bold tracking-widest text-amber-400 uppercase">
+                  NILO AXIS STUDIO — CMS & PORTFOLIO ENGINE
+                </h2>
+                {adminUser?.email && (
+                  <span className="hidden md:inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-[10px] text-amber-300">
+                    <ShieldCheck className="w-3 h-3 text-amber-400" />
+                    {adminUser.email}
+                  </span>
+                )}
+              </div>
               <p className="text-[10px] text-stone-400 tracking-wider">
-                NO-CODE ATELIER MANAGEMENT • 55 CONTROL MODULES
+                NO-CODE ATELIER MANAGEMENT • SUPABASE IAM PROTECTED
               </p>
             </div>
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center flex-wrap gap-2">
             <button
               onClick={() => setIsGoogleDriveModalOpen(true)}
               className="flex items-center space-x-1 text-xs px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500 hover:text-stone-950 text-amber-300 font-bold border border-amber-500/50 rounded transition shadow-sm"
@@ -188,8 +199,21 @@ export const CmsModal: React.FC = () => {
             </button>
 
             <button
+              onClick={async () => {
+                await logoutAdmin();
+                setIsCmsOpen(false);
+              }}
+              className="flex items-center space-x-1 text-xs px-3 py-1.5 bg-red-950/60 hover:bg-red-900 text-red-200 border border-red-800/80 rounded transition cursor-pointer"
+              title="Sign out of Supabase Admin"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>LOGOUT</span>
+            </button>
+
+            <button
               onClick={() => setIsCmsOpen(false)}
-              className="p-2 bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold rounded-lg transition"
+              className="p-2 bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold rounded-lg transition cursor-pointer"
+              title="Close CMS Drawer"
             >
               <X className="w-5 h-5" />
             </button>

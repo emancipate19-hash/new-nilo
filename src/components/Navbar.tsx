@@ -33,7 +33,10 @@ export const Navbar: React.FC<NavbarProps> = ({
     studioName,
     isAdminMode,
     setIsAdminMode,
+    isCmsOpen,
     setIsCmsOpen,
+    isAdminAuthenticated,
+    setIsAdminLoginModalOpen,
     setIsGoogleDriveModalOpen,
     updateLogo,
     uploadFileAsDataUrl,
@@ -190,7 +193,13 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* CMS Modal Trigger */}
           <button
-            onClick={() => setIsCmsOpen(true)}
+            onClick={() => {
+              if (isAdminAuthenticated) {
+                setIsCmsOpen(true);
+              } else {
+                setIsAdminLoginModalOpen(true);
+              }
+            }}
             onMouseEnter={() => setCursorContext({ mode: 'link', text: 'CMS' })}
             onMouseLeave={() => setCursorContext({ mode: 'default' })}
             className="flex items-center gap-1.5 rounded-sm px-3.5 py-1.5 text-[11px] font-mono border bg-slate-900 text-amber-300 font-bold border-amber-500/40 hover:bg-amber-400 hover:text-slate-950 transition-all shadow-[0_0_15px_rgba(245,158,11,0.2)]"
@@ -204,8 +213,12 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             id="btn-navbar-inline-edit"
             onClick={() => {
-              const nextState = !isAdminMode;
-              setIsAdminMode(nextState);
+              if (isAdminAuthenticated) {
+                const nextState = !isAdminMode;
+                setIsAdminMode(nextState);
+              } else {
+                setIsAdminLoginModalOpen(true);
+              }
             }}
             onMouseEnter={() => setCursorContext({ mode: 'link', text: isAdminMode ? 'DONE' : 'STUDIO EDIT' })}
             onMouseLeave={() => setCursorContext({ mode: 'default' })}
@@ -370,7 +383,11 @@ export const Navbar: React.FC<NavbarProps> = ({
           </button>
           <button
             onClick={() => {
-              setIsCmsOpen(true);
+              if (isAdminAuthenticated) {
+                setIsCmsOpen(true);
+              } else {
+                setIsAdminLoginModalOpen(true);
+              }
               setMobileMenuOpen(false);
             }}
             className="block w-full text-left py-2 text-amber-400 font-bold hover:text-amber-300 uppercase tracking-widest flex items-center gap-2"
@@ -380,7 +397,11 @@ export const Navbar: React.FC<NavbarProps> = ({
           </button>
           <button
             onClick={() => {
-              setIsAdminMode(!isAdminMode);
+              if (isAdminAuthenticated) {
+                setIsAdminMode(!isAdminMode);
+              } else {
+                setIsAdminLoginModalOpen(true);
+              }
               setMobileMenuOpen(false);
             }}
             className="block w-full text-left py-2 text-amber-300 hover:text-white uppercase tracking-widest flex items-center gap-2"

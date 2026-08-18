@@ -22,11 +22,12 @@ export const supabase: SupabaseClient = createClient(
   supabaseAnonKey || 'anon-key-placeholder',
   {
     auth: {
-      persistSession: false,
-      autoRefreshToken: false
+      persistSession: true,
+      autoRefreshToken: true
     }
   }
 );
 
-export const isSupabaseConfigured = Boolean(supabaseAnonKey && supabaseAnonKey !== 'anon-key-placeholder');
+export const isSupabaseConfigured: boolean = Boolean(supabaseAnonKey && supabaseAnonKey !== 'anon-key-placeholder');
+export const checkIsSupabaseConfigured = (): boolean => Boolean(supabaseAnonKey && supabaseAnonKey !== 'anon-key-placeholder');
 

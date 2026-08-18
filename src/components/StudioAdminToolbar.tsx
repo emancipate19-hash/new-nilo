@@ -9,7 +9,9 @@ import {
   FolderSync,
   Film,
   Sparkles,
-  ChevronUp
+  ChevronUp,
+  LogOut,
+  ShieldCheck
 } from 'lucide-react';
 
 interface StudioAdminToolbarProps {
@@ -36,7 +38,9 @@ export const StudioAdminToolbar: React.FC<StudioAdminToolbarProps> = ({ onOpenAd
     setIsGoogleDriveModalOpen,
     projectAnimationPreset,
     setProjectAnimationPreset,
-    studioName
+    studioName,
+    adminUser,
+    logoutAdmin
   } = useStudio();
 
   const [isAnimDropdownOpen, setIsAnimDropdownOpen] = useState(false);
@@ -166,6 +170,24 @@ export const StudioAdminToolbar: React.FC<StudioAdminToolbarProps> = ({ onOpenAd
         >
           <RefreshCw className="h-3.5 w-3.5" />
           <span>RESET DEFAULTS</span>
+        </button>
+
+        {adminUser?.email && (
+          <div className="hidden lg:flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-950 border border-slate-800 text-[10px] text-amber-300">
+            <ShieldCheck className="h-3 w-3 text-amber-400" />
+            <span className="max-w-[120px] truncate">{adminUser.email}</span>
+          </div>
+        )}
+
+        <button
+          onClick={async () => {
+            await logoutAdmin();
+          }}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-950/70 border border-red-800/80 text-red-200 hover:bg-red-900 hover:text-white font-bold transition-all shadow-sm cursor-pointer"
+          title="Sign out from Supabase Admin session"
+        >
+          <LogOut className="h-3.5 w-3.5" />
+          <span>LOGOUT</span>
         </button>
 
         <button
